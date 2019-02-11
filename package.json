@@ -1,0 +1,27 @@
+{
+  "name": "batah",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "server": "nodemon server.js",
+    "client": "npm run serve --prefix client",
+    "dev": "concurrently --names \"server,client\" \"npm run server \" \"npm run client \"",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "concurrently": "^4.1.0",
+    "nodemon": "^1.18.10"
+  },
+  "dependencies": {
+    "apollo-boost": "^0.1.27",
+    "apollo-server": "^2.4.0",
+    "bcryptjs": "^2.4.3",
+    "dotenv": "^6.2.0",
+    "graphql": "^14.1.1",
+    "jsonwebtoken": "^8.4.0",
+    "mongoose": "^5.4.11"
+  }
+}
