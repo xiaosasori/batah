@@ -1,4 +1,6 @@
 const { hashPassword, createToken, getUserId } = require('./utils');
+const bcryptjs = require('bcryptjs')
+// ----------------------
 const {OAuth2Client} = require('google-auth-library');
 const CLIENT_ID = "131089285485-c6aep24hbqq39l6ftd5mnjep5495tssc.apps.googleusercontent.com"
 const client = new OAuth2Client(CLIENT_ID);
@@ -9,14 +11,8 @@ async function verify(token) {
       // Or, if multiple clients access the backend:
       //[CLIENT_ID_1, CLIENT_ID_2, CLIENT_ID_3]
   });
-  const payload = ticket.getPayload();
-  console.log('tiket',ticket)
-  console.log(payload)
-  const userid = payload['sub'];
-  // If request specified a G Suite domain:
-  //const domain = payload['hd'];
 }
-
+// -----------------------
 module.exports = {
   Query: {
     async me(_, args, { User, req }) {
@@ -26,11 +22,11 @@ module.exports = {
   },
   Mutation: {
     async signup(_, { email, password }, { User }) {
-      const hashedPassword = await hashPassword(password);
       const user = await User.findOne({ email });
       if (user) {
         throw new Error('User already exists');
       }
+      const hashedPassword = await hashPassword(password);
       const newUser = await new User({
         password: hashedPassword,
         email

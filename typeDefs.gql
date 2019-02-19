@@ -3,7 +3,64 @@ type User {
   email: String!
   password: String!
   avatar: String
-  joinDate: String
+  joinDate: String!
+  firstName: String!
+  lastName: String!
+  phone: String!
+  location: Location
+  paymentAccount: [PaymentAccount]
+}
+
+type Location {
+  _id: ID!
+  lat: Float!
+  lng: Float!
+  address: String!
+  directions: String!
+}
+
+type PaymentAccount {
+  _id: ID!
+  createdAt: String!
+  type: PAYMENT_PROVIDER
+  user: User!
+  payments: [Payment!]!
+  paypal: PaypalInformation
+  creditcard: CreditCardInformation
+}
+
+type Payment {
+  _id: ID!
+  booking: Booking!
+  createdAt: String!
+  paymentMethod: PaymentAccount!
+  serviceFee: Float!
+}
+
+type PaypalInformation {
+  _id: ID!
+  createdAt: DateTime!
+  email: String!
+  paymentAccount: PaymentAccount
+}
+
+type CreditCardInformation {
+  _id: ID!
+  cardNumber: String!
+  country: String!
+  createdAt: DateTime!
+  expiresOnMonth: Int!
+  expiresOnYear: Int!
+  firstName: String!
+  lastName: String!
+  paymentAccount: PaymentAccount
+  postalCode: String!
+  securityCode: String!
+}
+
+enum PAYMENT_PROVIDER {
+  PAYPAL
+  CREDIT_CARD
 }
 
 type Query {
