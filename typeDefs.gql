@@ -1,26 +1,181 @@
 type User {
-  _id: ID!
-  email: String!
-  password: String!
-  avatar: String
-  joinDate: String!
+  id: ID! 
+  createdAt: String!
+  updatedAt: String!
   firstName: String!
   lastName: String!
+  email: String! 
+  password: String!
   phone: String!
+  ownedPlaces: [Place!]!
   location: Location
-  paymentAccount: [PaymentAccount]
+  bookings: [Booking!]!
+  paymentAccount: [PaymentAccount!]!
+  sentMessages: [Message!]!
+  receivedMessages: [Message!]!
+  notifications: [Notification!]!
+  profilePicture: Picture
+}
+
+type Place {
+  id: ID! 
+  name: String!
+  type: PLACE_TYPES
+  shortDescription: String!
+  description: String!
+  size: Int!
+  numSeats: Int!
+  reviews: [Review!]!
+  amenities: Amenities!
+  host: User!
+  pricing: Pricing!
+  location: Location!
+  views: Views!
+  guestRequirements: GuestRequirements
+  policies: Policies
+  houseRules: HouseRules
+  bookings: [Booking!]!
+  pictures: [Picture!]!
+  popularity: Int!
+  availableSchedule: [AvailableSchedule!]!
+}
+
+type Pricing {
+  id: ID! 
+  place: Place!
+  monthlyDiscount: Int
+  weeklyDiscount: Int
+  smartPricing: Boolean!
+  basePrice: Int!
+  averageWeekly: Int!
+  averageMonthly: Int!
+  weekendPricing: Int
+  currency: CURRENCY
+}
+
+type GuestRequirements {
+  id: ID! 
+  govIssuedId: Boolean!
+  place: Place!
+}
+
+type Policies {
+  id: ID! 
+  createdAt: String!
+  updatedAt: String!
+  checkInStartTime: Float!
+  checkInEndTime: Float!
+  checkoutTime: Float!
+  place: Place!
+}
+
+type HouseRules {
+  id: ID! 
+  createdAt: String!
+  updatedAt: String!
+  smokingAllowed: Boolean
+  partiesAndEventsAllowed: Boolean
+  additionalRules: String
+}
+
+type Views {
+  id: ID! 
+  lastWeek: Int!
+  place: Place!
 }
 
 type Location {
-  _id: ID!
+  id: ID! 
   lat: Float!
   lng: Float!
+  neighbourHood: Neighbourhood
+  user: User
+  place: Place
   address: String!
   directions: String!
 }
 
+type Neighbourhood {
+  id: ID! 
+  locations: [Location!]!
+  name: String!
+  slug: String!
+  homePreview: Picture
+  city: City!
+  featured: Boolean!
+  popularity: Int!
+}
+
+type City {
+  id: ID! 
+  name: String!
+  neighbourhoods: [Neighbourhood!]!
+}
+
+type Picture {
+  id: ID! 
+  url: String!
+}
+
+type Amenities {
+  id: ID! 
+  place: Place!
+  wifi: Boolean!
+  smokingAllowed: Boolean!
+  partiesAndEventsAllowed: Boolean!
+  tv: Boolean!
+  airConditioning: Boolean!
+  projector: Boolean!
+  whiteBoard: Boolean!
+}
+
+type Review {
+  id: ID! 
+  createdAt: String!
+  text: String!
+  stars: Int!
+  accuracy: Int!
+  location: Int!
+  checkIn: Int!
+  cleanliness: Int!
+  place: Place!
+}
+
+type AvailableSchedule {
+  id: ID! 
+  place: Place!
+  availableDate: String!
+  availableHour: String!
+}
+
+type BookedSchedule {
+  id: ID!
+  place: Place!
+  bookedDate: String!
+  bookedHour: String!
+}
+
+type Booking {
+  id: ID!
+  createdAt: String!
+  bookee: User!
+  place: Place!
+  bookedSchedules: [BookedSchedule!]! 
+  payment: Payment
+}
+
+type Payment {
+  id: ID!
+  createdAt: String!
+  serviceFee: Float!
+  placePrice: Float!
+  totalPrice: Float!
+  booking: Booking!
+  paymentMethod: PaymentAccount!
+}
+
 type PaymentAccount {
-  _id: ID!
+  id: ID! 
   createdAt: String!
   type: PAYMENT_PROVIDER
   user: User!
@@ -29,37 +184,68 @@ type PaymentAccount {
   creditcard: CreditCardInformation
 }
 
-type Payment {
-  _id: ID!
-  createdAt: String!
-  paymentMethod: PaymentAccount!
-  serviceFee: Float!
-}
-
 type PaypalInformation {
-  _id: ID!
+  id: ID! 
   createdAt: String!
   email: String!
-  paymentAccount: PaymentAccount
+  paymentAccount: PaymentAccount!
 }
 
 type CreditCardInformation {
-  _id: ID!
-  cardNumber: String!
-  country: String!
+  id: ID! 
   createdAt: String!
+  cardNumber: String!
   expiresOnMonth: Int!
   expiresOnYear: Int!
+  securityCode: String!
   firstName: String!
   lastName: String!
-  paymentAccount: PaymentAccount
   postalCode: String!
-  securityCode: String!
+  country: String!
+  paymentAccount: PaymentAccount
+}
+
+type Message {
+  id: ID! 
+  createdAt: String!
+  from: User!
+  to: User!
+  deliveredAt: String!
+  readAt: String!
+}
+
+type Notification {
+  id: ID! 
+  createdAt: String!
+  type: NOTIFICATION_TYPE
+  user: User!
+  link: String!
+  readDate: String!
+}
+
+enum CURRENCY {
+  EUR
+  JPY
+  USD
+  VND
+}
+
+enum PLACE_TYPES {
+  MEETING
+  TEACHING
+  TALKSHOW
 }
 
 enum PAYMENT_PROVIDER {
   PAYPAL
   CREDIT_CARD
+}
+
+enum NOTIFICATION_TYPE {
+  OFFER
+  INSTANT_BOOK
+  RESPONSIVENESS
+  HOUSE_RULES
 }
 
 type Query {
