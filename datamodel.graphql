@@ -247,31 +247,3 @@ enum NOTIFICATION_TYPE {
   RESPONSIVENESS
   HOUSE_RULES
 }
-
-type Query {
-  me: User!
-}
-
-type Mutation {
-  signup(email: String!, password: String!): AuthPayload!
-  login(email: String!, password: String!): AuthPayload!
-  signinUser(token: String!, type: String!): Token!
-}
-type Token {
-  token: String!
-}
-type AuthPayload {
-  token: String!
-  user: User!
-}
-
-input CreateUserInput {
-  name: String!
-  email: String!
-  password: String!
-}
-
-input LoginUserInput {
-  email: String!
-  password: String!
-}
