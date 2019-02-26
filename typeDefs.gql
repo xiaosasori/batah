@@ -39,7 +39,7 @@ type Payment {
 
 type PaypalInformation {
   _id: ID!
-  createdAt: DateTime!
+  createdAt: String!
   email: String!
   paymentAccount: PaymentAccount
 }
@@ -48,7 +48,7 @@ type CreditCardInformation {
   _id: ID!
   cardNumber: String!
   country: String!
-  createdAt: DateTime!
+  createdAt: String!
   expiresOnMonth: Int!
   expiresOnYear: Int!
   firstName: String!
