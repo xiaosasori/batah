@@ -257,9 +257,11 @@ type Mutation {
   login(email: String!, password: String!): AuthPayload!
   signinUser(token: String!, type: String!): Token!
 }
+
 type Token {
   token: String!
 }
+
 type AuthPayload {
   token: String!
   user: User!
