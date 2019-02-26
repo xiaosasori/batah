@@ -31,7 +31,6 @@ type PaymentAccount {
 
 type Payment {
   _id: ID!
-  booking: Booking!
   createdAt: String!
   paymentMethod: PaymentAccount!
   serviceFee: Float!
