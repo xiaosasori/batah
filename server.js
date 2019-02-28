@@ -48,7 +48,7 @@ const server = new ApolloServer({
   context: async ({req}) => {
     return {
       User,
-      req
+      req// request token
     }
   }
 })
