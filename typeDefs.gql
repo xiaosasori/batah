@@ -1,15 +1,15 @@
 type User {
-  id: ID! 
+  id: ID!
   createdAt: String!
   updatedAt: String!
   firstName: String!
   lastName: String!
-  email: String! 
+  email: String!
   password: String!
   phone: String!
   ownedPlaces: [Place!]!
   location: Location
-  bookings: [Booking!]!
+  bookings: [Booking!]
   paymentAccount: [PaymentAccount!]!
   sentMessages: [Message!]!
   receivedMessages: [Message!]!
@@ -18,7 +18,7 @@ type User {
 }
 
 type Place {
-  id: ID! 
+  id: ID!
   name: String!
   type: PLACE_TYPES
   shortDescription: String!
@@ -41,7 +41,7 @@ type Place {
 }
 
 type Pricing {
-  id: ID! 
+  id: ID!
   place: Place!
   monthlyDiscount: Int
   weeklyDiscount: Int
@@ -54,13 +54,13 @@ type Pricing {
 }
 
 type GuestRequirements {
-  id: ID! 
+  id: ID!
   govIssuedId: Boolean!
   place: Place!
 }
 
 type Policies {
-  id: ID! 
+  id: ID!
   createdAt: String!
   updatedAt: String!
   checkInStartTime: Float!
@@ -70,7 +70,7 @@ type Policies {
 }
 
 type HouseRules {
-  id: ID! 
+  id: ID!
   createdAt: String!
   updatedAt: String!
   smokingAllowed: Boolean
@@ -79,13 +79,13 @@ type HouseRules {
 }
 
 type Views {
-  id: ID! 
+  id: ID!
   lastWeek: Int!
   place: Place!
 }
 
 type Location {
-  id: ID! 
+  id: ID!
   lat: Float!
   lng: Float!
   neighbourHood: Neighbourhood
@@ -96,7 +96,7 @@ type Location {
 }
 
 type Neighbourhood {
-  id: ID! 
+  id: ID!
   locations: [Location!]!
   name: String!
   slug: String!
@@ -107,18 +107,18 @@ type Neighbourhood {
 }
 
 type City {
-  id: ID! 
+  id: ID!
   name: String!
   neighbourhoods: [Neighbourhood!]!
 }
 
 type Picture {
-  id: ID! 
+  id: ID!
   url: String!
 }
 
 type Amenities {
-  id: ID! 
+  id: ID!
   place: Place!
   wifi: Boolean!
   smokingAllowed: Boolean!
@@ -130,7 +130,7 @@ type Amenities {
 }
 
 type Review {
-  id: ID! 
+  id: ID!
   createdAt: String!
   text: String!
   stars: Int!
@@ -142,7 +142,7 @@ type Review {
 }
 
 type AvailableSchedule {
-  id: ID! 
+  id: ID!
   place: Place!
   availableDate: String!
   availableHour: String!
@@ -175,7 +175,7 @@ type Payment {
 }
 
 type PaymentAccount {
-  id: ID! 
+  id: ID!
   createdAt: String!
   type: PAYMENT_PROVIDER
   user: User!
@@ -185,14 +185,14 @@ type PaymentAccount {
 }
 
 type PaypalInformation {
-  id: ID! 
+  id: ID!
   createdAt: String!
   email: String!
   paymentAccount: PaymentAccount!
 }
 
 type CreditCardInformation {
-  id: ID! 
+  id: ID!
   createdAt: String!
   cardNumber: String!
   expiresOnMonth: Int!
@@ -206,7 +206,7 @@ type CreditCardInformation {
 }
 
 type Message {
-  id: ID! 
+  id: ID!
   createdAt: String!
   from: User!
   to: User!
@@ -215,7 +215,7 @@ type Message {
 }
 
 type Notification {
-  id: ID! 
+  id: ID!
   createdAt: String!
   type: NOTIFICATION_TYPE
   user: User!

@@ -1,4 +1,4 @@
-const { hashPassword, createToken, getUserId } = require('./utils');
+const { hashPassword, createToken, getUserId } = require('../utils');
 const bcryptjs = require('bcryptjs')
 // ----------------------
 const {OAuth2Client} = require('google-auth-library');
@@ -43,9 +43,10 @@ module.exports = {
       if (!isValidPassword) throw new Error('Invalid password');
       return { user, token: createToken(user, '1hr') };
     },
-    async signinUser(_, { token, type }, { User }) {
+    signinUser(_, { token, type }, { User }) {
       verify(token).catch(console.error);
       return {token: type};
-    }
+    },
+
   }
 };
