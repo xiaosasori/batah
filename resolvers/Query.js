@@ -7,5 +7,4 @@ const Query = {
         return await User.findById(userId);
     }
 }
-
 module.exports = Query
