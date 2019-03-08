@@ -1,6 +1,16 @@
 const mongoose = require('mongoose')
 // const bcryptjs = require('bcryptjs')
 const UserSchema = new mongoose.Schema({
+    firstName: {
+        type: String,
+        required: true,
+        trim: true
+    },
+    lastName: {
+        type: String,
+        required: true,
+        trim: true
+    },
     email: {
         type: String,
         required: true,
@@ -9,7 +19,6 @@ const UserSchema = new mongoose.Schema({
     },
     password: {
         type: String,
-        required: true,
         trim: true
     },
     avatar: {
@@ -18,14 +27,24 @@ const UserSchema = new mongoose.Schema({
     joinDate: {
         type: Date,
         default: Date.now
+    },
+    address: {
+        type: String
+    },
+    phone: {
+        type: String
+    },
+    userType: {
+        type: String,
+        default: 'normal'
     }
 })
 
 // Create and add avatar to user
-UserSchema.pre('save', function(next){
-    this.avatar = `http://gravatar.com/avatar/${this.username}?d=identicon`
-    next()
-})
+// UserSchema.pre('save', function(next){
+//     this.avatar = `http://gravatar.com/avatar/${this.username}?d=identicon`
+//     next()
+// })
 
 // Hash password so it can't be seen w/ access to database
 // UserSchema.pre('save', function(next){

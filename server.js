@@ -1,6 +1,10 @@
 const {ApolloServer, AuthenticationError} = require('apollo-server');
 const mongoose = require('mongoose');
+// import models
 const User = require('./models/User')
+const Office = require('./models/Office')
+
+// import models
 require('dotenv').config({path: 'variables.env'})
 // Import typeDefs & resolvers
 const resolvers = require('./resolvers')
@@ -21,11 +25,13 @@ mongoose
     .catch(err => console.log('Connect MongoDB error:',err))
 // Create graphql server
 const server = new ApolloServer({
+  cors: true,
   typeDefs,
   resolvers,
   context: async ({req}) => {
     return {
       User,
+      Office,
       req
     }
   }

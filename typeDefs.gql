@@ -1,27 +1,27 @@
 type User {
-  id: ID! 
+  id: ID!
   createdAt: String!
   updatedAt: String!
   firstName: String!
   lastName: String!
-  email: String! 
+  email: String!
   password: String!
   phone: String!
-  ownedPlaces: [Place!]!
+  ownedOffices: [Office!]!
   location: Location
   bookings: [Booking!]!
   paymentAccount: [PaymentAccount!]!
   sentMessages: [Message!]!
   receivedMessages: [Message!]!
   notifications: [Notification!]!
-  profilePicture: Picture
+  avatar: String!
+  userType: String
 }
 
-type Place {
-  id: ID! 
-  name: String!
-  type: PLACE_TYPES
-  shortDescription: String!
+type Office {
+  id: ID!
+  title: String!
+  category: String!
   description: String!
   size: Int!
   numSeats: Int!
@@ -31,9 +31,8 @@ type Place {
   pricing: Pricing!
   location: Location!
   views: Views!
-  guestRequirements: GuestRequirements
   policies: Policies
-  houseRules: HouseRules
+  officeRules: OfficeRules
   bookings: [Booking!]!
   pictures: [Picture!]!
   popularity: Int!
@@ -41,88 +40,72 @@ type Place {
 }
 
 type Pricing {
-  id: ID! 
-  place: Place!
-  monthlyDiscount: Int
-  weeklyDiscount: Int
+  id: ID!
+  office: Office!
   smartPricing: Boolean!
   basePrice: Int!
-  averageWeekly: Int!
-  averageMonthly: Int!
-  weekendPricing: Int
+  minPrice: Int!
+  maxPrice: Int!
   currency: CURRENCY
 }
 
-type GuestRequirements {
-  id: ID! 
-  govIssuedId: Boolean!
-  place: Place!
-}
-
 type Policies {
-  id: ID! 
-  createdAt: String!
-  updatedAt: String!
-  checkInStartTime: Float!
-  checkInEndTime: Float!
-  checkoutTime: Float!
-  place: Place!
+  id: ID!
+  govIssuedId: Boolean!
+  minUsingTime: Int!
+  office: Office!
+  additionalPolicies: String
 }
 
-type HouseRules {
-  id: ID! 
-  createdAt: String!
-  updatedAt: String!
-  smokingAllowed: Boolean
-  partiesAndEventsAllowed: Boolean
+type OfficeRules {
+  id: ID!
+  smokingAllowed: Boolean!
+  partiesAndEventsAllowed: Boolean!
   additionalRules: String
+  office: Office!
 }
 
 type Views {
-  id: ID! 
+  id: ID!
   lastWeek: Int!
-  place: Place!
+  office: Office!
 }
 
 type Location {
-  id: ID! 
+  id: ID!
   lat: Float!
   lng: Float!
   neighbourHood: Neighbourhood
   user: User
-  place: Place
+  office: Office
   address: String!
   directions: String!
 }
 
 type Neighbourhood {
-  id: ID! 
+  id: ID!
   locations: [Location!]!
   name: String!
-  slug: String!
-  homePreview: Picture
+  placePreview: Picture
   city: City!
-  featured: Boolean!
   popularity: Int!
 }
 
 type City {
-  id: ID! 
+  id: ID!
   name: String!
   neighbourhoods: [Neighbourhood!]!
 }
 
 type Picture {
-  id: ID! 
+  id: ID!
   url: String!
 }
 
 type Amenities {
-  id: ID! 
-  place: Place!
+  id: ID!
+  office: Office!
   wifi: Boolean!
-  smokingAllowed: Boolean!
-  partiesAndEventsAllowed: Boolean!
   tv: Boolean!
   airConditioning: Boolean!
   projector: Boolean!
@@ -130,7 +113,7 @@ type Amenities {
 }
 
 type Review {
-  id: ID! 
+  id: ID!
   createdAt: String!
   text: String!
   stars: Int!
@@ -138,19 +121,19 @@ type Review {
   location: Int!
   checkIn: Int!
   cleanliness: Int!
-  place: Place!
+  office: Office!
 }
 
 type AvailableSchedule {
-  id: ID! 
-  place: Place!
+  id: ID!
+  office: Office!
   availableDate: String!
   availableHour: String!
 }
 
 type BookedSchedule {
   id: ID!
-  place: Place!
+  booking: Booking!
   bookedDate: String!
   bookedHour: String!
 }
@@ -159,8 +142,8 @@ type Booking {
   id: ID!
   createdAt: String!
   bookee: User!
-  place: Place!
-  bookedSchedules: [BookedSchedule!]! 
+  office: Office!
+  bookedSchedules: [BookedSchedule!]!
   payment: Payment
 }
 
@@ -168,14 +151,14 @@ type Payment {
   id: ID!
   createdAt: String!
   serviceFee: Float!
-  placePrice: Float!
+  officePrice: Float!
   totalPrice: Float!
   booking: Booking!
   paymentMethod: PaymentAccount!
 }
 
 type PaymentAccount {
-  id: ID! 
+  id: ID!
   createdAt: String!
   type: PAYMENT_PROVIDER
   user: User!
@@ -185,14 +168,14 @@ type PaymentAccount {
 }
 
 type PaypalInformation {
-  id: ID! 
+  id: ID!
   createdAt: String!
   email: String!
   paymentAccount: PaymentAccount!
 }
 
 type CreditCardInformation {
-  id: ID! 
+  id: ID!
   createdAt: String!
   cardNumber: String!
   expiresOnMonth: Int!
@@ -206,7 +189,7 @@ type CreditCardInformation {
 }
 
 type Message {
-  id: ID! 
+  id: ID!
   createdAt: String!
   from: User!
   to: User!
@@ -215,7 +198,7 @@ type Message {
 }
 
 type Notification {
-  id: ID! 
+  id: ID!
   createdAt: String!
   type: NOTIFICATION_TYPE
   user: User!
@@ -230,7 +213,7 @@ enum CURRENCY {
   VND
 }
 
-enum PLACE_TYPES {
+enum OFFICE_TYPES {
   MEETING
   TEACHING
   TALKSHOW
@@ -250,12 +233,37 @@ enum NOTIFICATION_TYPE {
 
 type Query {
   me: User!
+  getCurrentUser: User
+  searchLocation(address: String!, lat: Int!, lng: Int!): [Location!]!
 }
 
 type Mutation {
-  signup(email: String!, password: String!): AuthPayload!
+  signup(
+    email: String!
+    password: String!
+    firstName: String!
+    lastName: String!
+  ): AuthPayload!
   login(email: String!, password: String!): AuthPayload!
+  loginGoogle(token: String!): AuthPayload!
   signinUser(token: String!, type: String!): Token!
+  updateProfile(
+    firstName: String!
+    lastName: String!
+    email: String!
+    phone: String
+  ): User!
+  addList(
+    city: String!
+    title: String!
+    category: String!
+    address: String!
+    description: String!
+    phone: String!
+    website: String
+    email: String
+    amenities: [String!]!
+  ): Office!
 }
 type Token {
   token: String!
@@ -263,15 +271,4 @@ type Token {
 type AuthPayload {
   token: String!
   user: User!
-}
-
-input CreateUserInput {
-  name: String!
-  email: String!
-  password: String!
-}
-
-input LoginUserInput {
-  email: String!
-  password: String!
 }

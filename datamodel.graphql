@@ -1,26 +1,26 @@
 type User {
-  id: ID! 
-  createdAt: String!
-  updatedAt: String!
+  id: ID! @unique
+  createdAt: DateTime!
+  updatedAt: DateTime!
   firstName: String!
   lastName: String!
-  email: String! 
+  email: String! @unique
   password: String!
   phone: String!
-  ownedPlaces: [Place!]!
+  ownedOffices: [Office!]!
   location: Location
   bookings: [Booking!]!
   paymentAccount: [PaymentAccount!]!
-  sentMessages: [Message!]!
-  receivedMessages: [Message!]!
+  sentMessages: [Message!]! @relation(name: "SentMessages")
+  receivedMessages: [Message!]! @relation(name: "ReceivedMessages")
   notifications: [Notification!]!
   profilePicture: Picture
 }
 
-type Place {
-  id: ID! 
+type Office {
+  id: ID! @unique
   name: String!
-  type: PLACE_TYPES
+  type: OFFICE_TYPES
   shortDescription: String!
   description: String!
   size: Int!
@@ -31,9 +31,8 @@ type Place {
   pricing: Pricing!
   location: Location!
   views: Views!
-  guestRequirements: GuestRequirements
   policies: Policies
-  houseRules: HouseRules
+  officeRules: OfficeRules
   bookings: [Booking!]!
   pictures: [Picture!]!
   popularity: Int!
@@ -41,142 +40,126 @@ type Place {
 }
 
 type Pricing {
-  id: ID! 
-  place: Place!
-  monthlyDiscount: Int
-  weeklyDiscount: Int
-  smartPricing: Boolean!
+  id: ID! @unique
+  office: Office!
+  smartPricing: Boolean! @default(value: "false")
   basePrice: Int!
-  averageWeekly: Int!
-  averageMonthly: Int!
-  weekendPricing: Int
+  minPrice: Int!
+  maxPrice: Int!
   currency: CURRENCY
 }
 
-type GuestRequirements {
-  id: ID! 
-  govIssuedId: Boolean!
-  place: Place!
-}
-
 type Policies {
-  id: ID! 
-  createdAt: String!
-  updatedAt: String!
-  checkInStartTime: Float!
-  checkInEndTime: Float!
-  checkoutTime: Float!
-  place: Place!
+  id: ID! @unique
+  govIssuedId: Boolean! @default(value: "false")
+  minUsingTime: Int!
+  office: Office!
+  additionalPolicies: String
 }
 
-type HouseRules {
-  id: ID! 
-  createdAt: String!
-  updatedAt: String!
-  smokingAllowed: Boolean
-  partiesAndEventsAllowed: Boolean
+type OfficeRules {
+  id: ID! @unique
+  smokingAllowed: Boolean! @default(value: "false")
+  partiesAndEventsAllowed: Boolean! @default(value: "false")
   additionalRules: String
+  office: Office!
 }
 
 type Views {
-  id: ID! 
+  id: ID! @unique
   lastWeek: Int!
-  place: Place!
+  office: Office!
 }
 
 type Location {
-  id: ID! 
+  id: ID! @unique
   lat: Float!
   lng: Float!
   neighbourHood: Neighbourhood
   user: User
-  place: Place
+  office: Office
   address: String!
   directions: String!
 }
 
 type Neighbourhood {
-  id: ID! 
+  id: ID! @unique
   locations: [Location!]!
   name: String!
-  slug: String!
-  homePreview: Picture
+  placePreview: Picture
   city: City!
-  featured: Boolean!
   popularity: Int!
 }
 
 type City {
-  id: ID! 
+  id: ID! @unique
   name: String!
   neighbourhoods: [Neighbourhood!]!
 }
 
 type Picture {
-  id: ID! 
+  id: ID! @unique
   url: String!
 }
 
 type Amenities {
-  id: ID! 
-  place: Place!
-  wifi: Boolean!
-  smokingAllowed: Boolean!
-  partiesAndEventsAllowed: Boolean!
-  tv: Boolean!
-  airConditioning: Boolean!
-  projector: Boolean!
-  whiteBoard: Boolean!
+  id: ID! @unique
+  office: Office!
+  wifi: Boolean! @default(value: "false")
+  tv: Boolean! @default(value: "false")
+  airConditioning: Boolean! @default(value: "false")
+  projector: Boolean! @default(value: "false")
+  whiteBoard: Boolean! @default(value: "false")
 }
 
 type Review {
-  id: ID! 
-  createdAt: String!
+  id: ID! @unique
+  createdAt: DateTime!
   text: String!
   stars: Int!
   accuracy: Int!
   location: Int!
   checkIn: Int!
   cleanliness: Int!
-  place: Place!
+  office: Office!
 }
 
 type AvailableSchedule {
-  id: ID! 
-  place: Place!
-  availableDate: String!
-  availableHour: String!
+  id: ID! @unique
+  office: Office!
+  availableDate: DateTime!
+  availableHour: DateTime!
 }
 
 type BookedSchedule {
-  id: ID!
-  place: Place!
-  bookedDate: String!
-  bookedHour: String!
+  id: ID! @unique
+  booking: Booking!
+  bookedDate: DateTime!
+  bookedHour: DateTime!
 }
 
 type Booking {
-  id: ID!
-  createdAt: String!
+  id: ID! @unique
+  createdAt: DateTime!
   bookee: User!
-  place: Place!
+  office: Office!
   bookedSchedules: [BookedSchedule!]! 
   payment: Payment
 }
 
 type Payment {
-  id: ID!
-  createdAt: String!
+  id: ID! @unique
+  createdAt: DateTime!
   serviceFee: Float!
-  placePrice: Float!
+  officePrice: Float!
   totalPrice: Float!
   booking: Booking!
   paymentMethod: PaymentAccount!
 }
 
 type PaymentAccount {
-  id: ID! 
-  createdAt: String!
+  id: ID! @unique
+  createdAt: DateTime!
   type: PAYMENT_PROVIDER
   user: User!
   payments: [Payment!]!
@@ -185,15 +168,15 @@ type PaymentAccount {
 }
 
 type PaypalInformation {
-  id: ID! 
-  createdAt: String!
+  id: ID! @unique
+  createdAt: DateTime!
   email: String!
   paymentAccount: PaymentAccount!
 }
 
 type CreditCardInformation {
-  id: ID! 
-  createdAt: String!
+  id: ID! @unique
+  createdAt: DateTime!
   cardNumber: String!
   expiresOnMonth: Int!
   expiresOnYear: Int!
@@ -206,21 +189,21 @@ type CreditCardInformation {
 }
 
 type Message {
-  id: ID! 
-  createdAt: String!
-  from: User!
-  to: User!
-  deliveredAt: String!
-  readAt: String!
+  id: ID! @unique
+  createdAt: DateTime!
+  from: User! @relation(name: "SentMessages")
+  to: User! @relation(name: "ReceivedMessages")
+  deliveredAt: DateTime!
+  readAt: DateTime!
 }
 
 type Notification {
-  id: ID! 
-  createdAt: String!
+  id: ID! @unique
+  createdAt: DateTime!
   type: NOTIFICATION_TYPE
   user: User!
   link: String!
-  readDate: String!
+  readDate: DateTime!
 }
 
 enum CURRENCY {
@@ -230,7 +213,7 @@ enum CURRENCY {
   VND
 }
 
-enum PLACE_TYPES {
+enum OFFICE_TYPES {
   MEETING
   TEACHING
   TALKSHOW
