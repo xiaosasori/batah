@@ -6,6 +6,7 @@ type User {
   lastName: String!
   email: String!
   password: String!
+<<<<<<< HEAD
   phone: String!
   ownedOffices: [Office!]!
   location: Location
@@ -78,10 +79,26 @@ type Location {
   neighbourHood: Neighbourhood
   user: User
   office: Office
+=======
+  avatar: String
+  joinDate: String!
+  firstName: String!
+  lastName: String!
+  phone: String!
+  location: Location
+  paymentAccount: [PaymentAccount]
+}
+
+type Location {
+  _id: ID!
+  lat: Float!
+  lng: Float!
+>>>>>>> 1fff55ead27319337fb8d96f2766ec11f43881b5
   address: String!
   directions: String!
 }
 
+<<<<<<< HEAD
 type Neighbourhood {
   id: ID!
   locations: [Location!]!
@@ -159,6 +176,10 @@ type Payment {
 
 type PaymentAccount {
   id: ID!
+=======
+type PaymentAccount {
+  _id: ID!
+>>>>>>> 1fff55ead27319337fb8d96f2766ec11f43881b5
   createdAt: String!
   type: PAYMENT_PROVIDER
   user: User!
@@ -167,6 +188,7 @@ type PaymentAccount {
   creditcard: CreditCardInformation
 }
 
+<<<<<<< HEAD
 type PaypalInformation {
   id: ID!
   createdAt: String!
@@ -217,11 +239,41 @@ enum OFFICE_TYPES {
   MEETING
   TEACHING
   TALKSHOW
+=======
+type Payment {
+  _id: ID!
+  booking: Booking!
+  createdAt: String!
+  paymentMethod: PaymentAccount!
+  serviceFee: Float!
+}
+
+type PaypalInformation {
+  _id: ID!
+  createdAt: DateTime!
+  email: String!
+  paymentAccount: PaymentAccount
+}
+
+type CreditCardInformation {
+  _id: ID!
+  cardNumber: String!
+  country: String!
+  createdAt: DateTime!
+  expiresOnMonth: Int!
+  expiresOnYear: Int!
+  firstName: String!
+  lastName: String!
+  paymentAccount: PaymentAccount
+  postalCode: String!
+  securityCode: String!
+>>>>>>> 1fff55ead27319337fb8d96f2766ec11f43881b5
 }
 
 enum PAYMENT_PROVIDER {
   PAYPAL
   CREDIT_CARD
+<<<<<<< HEAD
 }
 
 enum NOTIFICATION_TYPE {
@@ -229,6 +281,8 @@ enum NOTIFICATION_TYPE {
   INSTANT_BOOK
   RESPONSIVENESS
   HOUSE_RULES
+=======
+>>>>>>> 1fff55ead27319337fb8d96f2766ec11f43881b5
 }
 
 type Query {
