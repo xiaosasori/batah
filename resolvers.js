@@ -1,5 +1,4 @@
 const { hashPassword, createToken, getUserId } = require('./utils');
-<<<<<<< HEAD
 const bcryptjs = require('bcryptjs');
 // ----------------------
 const { OAuth2Client } = require('google-auth-library');
@@ -17,21 +16,6 @@ const CLIENT_ID =
 //   const lastName = payload['family_name']
 //   const avatar = payload['picture']
 // }
-=======
-const bcryptjs = require('bcryptjs')
-// ----------------------
-const {OAuth2Client} = require('google-auth-library');
-const CLIENT_ID = "131089285485-c6aep24hbqq39l6ftd5mnjep5495tssc.apps.googleusercontent.com"
-const client = new OAuth2Client(CLIENT_ID);
-async function verify(token) {
-  const ticket = await client.verifyIdToken({
-      idToken: token,
-      audience: CLIENT_ID,  // Specify the CLIENT_ID of the app that accesses the backend
-      // Or, if multiple clients access the backend:
-      //[CLIENT_ID_1, CLIENT_ID_2, CLIENT_ID_3]
-  });
-}
->>>>>>> 1fff55ead27319337fb8d96f2766ec11f43881b5
 // -----------------------
 module.exports = {
   Query: {
@@ -51,11 +35,7 @@ module.exports = {
     // }
   },
   Mutation: {
-<<<<<<< HEAD
     async signup(_, { email, password, firstName, lastName }, { User }) {
-=======
-    async signup(_, { email, password }, { User }) {
->>>>>>> 1fff55ead27319337fb8d96f2766ec11f43881b5
       const user = await User.findOne({ email });
       if (user) {
         throw new Error('User already exists');
