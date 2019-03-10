@@ -26,7 +26,7 @@ type Office {
   size: Int!
   numSeats: Int!
   reviews: [Review!]!
-  amenities: Amenities!
+  amenities: [String!]!
   host: User!
   pricing: Pricing!
   location: Location!
@@ -36,7 +36,8 @@ type Office {
   bookings: [Booking!]!
   pictures: [Picture!]!
   popularity: Int!
-  availableSchedule: [AvailableSchedule!]!
+  availableSchedule: [AvailableSchedule!]!,
+  tags: [String!]!
 }
 
 type Pricing {
@@ -46,14 +47,12 @@ type Pricing {
   basePrice: Int!
   minPrice: Int!
   maxPrice: Int!
-  currency: CURRENCY
 }
 
 type Policies {
   id: ID!
   govIssuedId: Boolean!
   minUsingTime: Int!
-  office: Office!
   additionalPolicies: String
 }
 
@@ -62,7 +61,6 @@ type OfficeRules {
   smokingAllowed: Boolean!
   partiesAndEventsAllowed: Boolean!
   additionalRules: String
-  office: Office!
 }
 
 type Views {
@@ -76,10 +74,8 @@ type Location {
   lat: Float!
   lng: Float!
   neighbourHood: Neighbourhood
-  user: User
-  office: Office
   address: String!
-  directions: String!
+  directions: String
 }
 
 type Neighbourhood {

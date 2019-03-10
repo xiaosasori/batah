@@ -2,37 +2,13 @@ const { hashPassword, createToken, getUserId } = require('./utils');
 const bcryptjs = require('bcryptjs');
 // ----------------------
 const { OAuth2Client } = require('google-auth-library');
-const CLIENT_ID =
-  '131089285485-c6aep24hbqq39l6ftd5mnjep5495tssc.apps.googleusercontent.com';
-// const client = new OAuth2Client(CLIENT_ID);
-// async function verify(token) {
-//   const ticket = await client.verifyIdToken({
-//       idToken: token,
-//       audience: CLIENT_ID
-//   });
-//   const payload = ticket.getPayload()
-//   const email = payload['email']
-//   const firstName = payload['given_name']
-//   const lastName = payload['family_name']
-//   const avatar = payload['picture']
-// }
-// -----------------------
+const CLIENT_ID = '131089285485-c6aep24hbqq39l6ftd5mnjep5495tssc.apps.googleusercontent.com';
 module.exports = {
   Query: {
     async getCurrentUser(_, args, { User, req }) {
       const userId = getUserId(req);
       return await User.findById(userId);
     }
-    //   getCurrentUser: async (_, args, { User, currentUser }) => {
-    //     if (!currentUser) return null;
-    //     const user = await User.findOne({
-    //         username: currentUser.username
-    //     }).populate({
-    //         path: 'favorites',
-    //         model: 'Post'
-    //     });
-    //     return user;
-    // }
   },
   Mutation: {
     async signup(_, { email, password, firstName, lastName }, { User }) {

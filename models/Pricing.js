@@ -13,7 +13,6 @@ const PricingSchema = new mongoose.Schema({
     },
     smartPricing: {
         type: Boolean,
-        required: true
     },
     basePrice: {
         type: Number,
@@ -21,17 +20,14 @@ const PricingSchema = new mongoose.Schema({
     },
     averageWeekly: {
         type: Number,
-        required: true
+        // required: true
     },
     averageMonthly: {
         type: Number,
-        required: true
+        // required: true
     },
     weekendPricing: {
         type: Number
-    },
-    currency: {
-        type: String
-    },
+    }
 })
 module.exports = mongoose.model('Pricing', PricingSchema)

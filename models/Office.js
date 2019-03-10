@@ -20,7 +20,7 @@ const PlaceSchema = new mongoose.Schema({
     },
     numSeats: {
         type: Number,
-        // required: true
+        required: true
     },
     reviews: {
         type: [mongoose.Schema.Types.ObjectId],
@@ -39,12 +39,12 @@ const PlaceSchema = new mongoose.Schema({
     pricing: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Pricing',
-        // required: true
+        required: true
     },
     location: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Location',
-        // required: true
+        required: true
     },
     views: {
         type: mongoose.Schema.Types.ObjectId,
