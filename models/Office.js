@@ -79,11 +79,10 @@ const PlaceSchema = new mongoose.Schema({
         type: [mongoose.Schema.Types.ObjectId],
         ref: 'Booking',
     },
-    pictures: {
-        type: [mongoose.Schema.Types.ObjectId],
-        ref: 'Picture',
-        // required: true
-    },
+    pictures: [{
+        type: String,
+        required: true
+    }],
     popularity: {
         type: Number
     },

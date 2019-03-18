@@ -10,7 +10,7 @@ const OfficeRules = require('./models/OfficeRules')
 // import models
 require('dotenv').config({path: 'variables.env'})
 // Import typeDefs & resolvers
-const resolvers = require('./resolvers')
+// const resolvers = require('./resolvers')
 const path = require('path')
 const fs = require('fs')
 const jwt = require('jsonwebtoken')
@@ -27,6 +27,7 @@ mongoose
     .then(()=>console.log(`DB connected`))
     .catch(err => console.log('Connect MongoDB error:',err))
 // Create graphql server
+const resolvers = require('./resolvers/index')
 const server = new ApolloServer({
   cors: true,
   typeDefs,

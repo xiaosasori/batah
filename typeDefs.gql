@@ -82,7 +82,7 @@ type Neighbourhood {
   id: ID!
   locations: [Location!]!
   name: String!
-  placePreview: Picture
+  placePreview: [String]
   city: City!
   popularity: Int!
 }
@@ -246,7 +246,7 @@ type Mutation {
     email: String!
     phone: String
   ): User!
-  addList(
+  createList(
     city: String!
     title: String!
     category: String!
@@ -256,12 +256,13 @@ type Mutation {
     website: String
     email: String
     amenities: [String!]!
-    schedule: [availableDays!]!
     numSeats: Int!
     location: LocationInput!
     tags: [String!]!
     pricing: PriceInput!
     officeRules: RuleInput!
+    schedule: [AvailableDays!]!
+    pictures: [String!]!
   ): Office!
 }
 input PriceInput {
@@ -273,7 +274,7 @@ input RuleInput {
 input LocationInput{
   lat: Float! lng:Float! address:String!
 }
-input availableDays {
+input AvailableDays {
   name: String!
   availableHour: [SlotInput!]
 }

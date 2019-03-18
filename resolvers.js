@@ -79,10 +79,6 @@ module.exports = {
         throw new Error('Invalid token');
       }
     },
-    async signinUser(_, { token, type }, { User }) {
-      verify(token).catch(console.error);
-      return { token: type };
-    },
     updateProfile(_, { email, firstName, lastName, phone }, { User, req }) {
       const userId = getUserId(req);
       const user = User.findOneAndUpdate(
@@ -92,7 +88,8 @@ module.exports = {
       );
       return user;
     },
-    async addList(
+    // function for host to add list
+    async createList(
       _,
       args,
       { User, Office, Location, Pricing, OfficeRules, req }
