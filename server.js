@@ -3,6 +3,9 @@ const mongoose = require('mongoose');
 // import models
 const User = require('./models/User')
 const Office = require('./models/Office')
+const Location = require('./models/Location')
+const Pricing = require('./models/Pricing')
+const OfficeRules = require('./models/OfficeRules')
 
 // import models
 require('dotenv').config({path: 'variables.env'})
@@ -32,6 +35,9 @@ const server = new ApolloServer({
     return {
       User,
       Office,
+      Location,
+      Pricing,
+      OfficeRules,
       req
     }
   }

@@ -1,10 +1,5 @@
 const mongoose = require('mongoose')
 const PricingSchema = new mongoose.Schema({
-    place: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Place',
-        required: true
-    },
     monthlyDiscount: {
         type: Number
     },

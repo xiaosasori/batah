@@ -34,7 +34,7 @@ type Office {
   policies: Policies
   officeRules: OfficeRules
   bookings: [Booking!]!
-  pictures: [Picture!]!
+  pictures: [String!]!
   popularity: Int!
   availableSchedule: [AvailableSchedule!]!,
   tags: [String!]!
@@ -93,11 +93,6 @@ type City {
   neighbourhoods: [Neighbourhood!]!
 }
 
-type Picture {
-  id: ID!
-  url: String!
-}
-
 type Amenities {
   id: ID!
   office: Office!
@@ -122,16 +117,18 @@ type Review {
 
 type AvailableSchedule {
   id: ID!
-  office: Office!
   availableDate: String!
-  availableHour: String!
+  availableHour: [Slot!]!
 }
-
+type Slot {
+  start: String!
+  end: String!
+}
 type BookedSchedule {
   id: ID!
   booking: Booking!
   bookedDate: String!
-  bookedHour: String!
+  bookedHour: Slot!
 }
 
 type Booking {
@@ -259,7 +256,30 @@ type Mutation {
     website: String
     email: String
     amenities: [String!]!
+    schedule: [availableDays!]!
+    numSeats: Int!
+    location: LocationInput!
+    tags: [String!]!
+    pricing: PriceInput!
+    officeRules: RuleInput!
   ): Office!
+}
+input PriceInput {
+  basePrice: Int!
+}
+input RuleInput {
+  smokingAllowed: Boolean! partiesAndEventsAllowed:Boolean! additionalRules:String
+}
+input LocationInput{
+  lat: Float! lng:Float! address:String!
+}
+input availableDays {
+  name: String!
+  availableHour: [SlotInput!]
+}
+input SlotInput {
+  start: String!
+  end: String!
 }
 type Token {
   token: String!

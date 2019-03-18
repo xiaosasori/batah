@@ -5,7 +5,8 @@ const PlaceSchema = new mongoose.Schema({
         required: true
     },
     category: {
-        type: String
+        type: String,
+        required: true
     },
     shortDescription: {
         type: String
@@ -22,10 +23,21 @@ const PlaceSchema = new mongoose.Schema({
         type: Number,
         required: true
     },
+    phone: {
+        type: String
+    },
+    website: {
+        type: String
+    },
+    email: {
+        type: String
+    },
+    tags: {
+        type: Array
+    },
     reviews: {
         type: [mongoose.Schema.Types.ObjectId],
         ref: 'Review',
-        required: true
     },
     amenities: {
         type: Array,
@@ -58,9 +70,10 @@ const PlaceSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Policies'
     },
-    houseRules: {
+    officeRules: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'HouseRules'
+        ref: 'OfficeRules',
+        required: true
     },
     bookings: {
         type: [mongoose.Schema.Types.ObjectId],
@@ -74,10 +87,18 @@ const PlaceSchema = new mongoose.Schema({
     popularity: {
         type: Number
     },
-    availableSchedule: {
-        type: [mongoose.Schema.Types.ObjectId],
-        ref: 'AvailableSchedule',
-        // required: true
-    },
+    availableSchedule: [{
+        date: {
+            type: Date
+        },
+        slots: [{
+            start: {
+                type: String
+            },
+            end: {
+                type: String
+            }
+        }]
+    }],
 })
 module.exports = mongoose.model('Office', PlaceSchema)

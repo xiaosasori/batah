@@ -16,17 +16,12 @@ const LocationSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User'
     },
-    place: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Place'
-    },
     address: {
         type: String,
         required: true
     },
     directions: {
-        type: String,
-        required: true
+        type: String
     },
 })
 module.exports = mongoose.model('Location', LocationSchema)

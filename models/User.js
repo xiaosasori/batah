@@ -37,7 +37,11 @@ const UserSchema = new mongoose.Schema({
     userType: {
         type: String,
         default: 'normal'
-    }
+    },
+    offices: [{
+        type: [mongoose.Schema.Types.ObjectId],
+        ref: 'Office'
+    }]
 })
 
 // Create and add avatar to user
