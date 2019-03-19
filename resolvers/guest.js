@@ -13,20 +13,45 @@ const guestResolver = {
       const userId = getUserId(req);
       return await User.findById(userId);
     },
-    async searchOffice(_, { title, location, category }, { Office, Location }) {
-      console.log('title',title)
-      console.log('location',location)
+    async searchOffice(_, { title, location, category }, { Office, Location, Pricing }) {
+
+      // titile
       if(!title && !location){
         throw new Error('Enter at least one field!');
       }
-      const condtion = {};
-      if(title) condtion.title = { "$regex": title, "$options": "i" };
+      const condition = {};
+      if(title) condition.title = { "$regex": title, "$options": "i" };
       if(location) {
         const foundLocation = await Location.find(location).select('_id')
-        condtion.location = foundLocation;
+        condition.location = foundLocation;
       }
-      if(category) condtion.category = category;  
-      return await Office.find(condtion);
+      if(category) condition.category = category;  
+      return await Office.find(condition);
+    },
+    async searchOfficeByFilter(_, { id, minSize, maxSize, minNumSeats, maxNumSeats, minPrice, maxPrice, amenities }, { Office, Pricing }) {
+      const condition = {};
+      // id
+      if(id){
+        condition._id = {$in: id};
+      }
+      // size
+      if(minSize && maxSize && minSize <= maxSize) {
+        condition.size = {  $gte: minSize, $lte: maxSize };
+      }
+      // numSeats
+      if(minNumSeats && maxNumSeats && minNumSeats <= maxNumSeats) {
+        condition.numSeats = {$gte: minNumSeats,  $lte:maxNumSeats };
+      }
+      // price
+      if(minPrice && maxPrice && minPrice <= maxPrice){
+        const foundPrice = await Pricing.find({basePrice: { $range: [ minPrice, maxPrice ] }}).select('_id')
+        condition.pricing = foundPrice;
+      }
+      // amentities
+      if(amenities){
+        condition.amenities = { $all: amenities };
+      }
+      return Office.find(condition);
     }
   },
   Mutation: {
