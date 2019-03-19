@@ -227,7 +227,8 @@ enum NOTIFICATION_TYPE {
 type Query {
   me: User!
   getCurrentUser: User
-  searchLocation(address: String!, lat: Int!, lng: Int!): [Location!]!
+  searchLocation(address: String!, lat: Int!, lng: Int!): [Location!]
+  searchOffice(name: String, location: LocationInput, category: String): [Office!]
 }
 
 type Mutation {
@@ -265,14 +266,17 @@ type Mutation {
     pictures: [String!]!
   ): Office!
 }
+input LocationInput {
+  lat: Int
+  lng: Int
+  address: String
+}
+
 input PriceInput {
   basePrice: Int!
 }
 input RuleInput {
   smokingAllowed: Boolean! partiesAndEventsAllowed:Boolean! additionalRules:String
-}
-input LocationInput{
-  lat: Float! lng:Float! address:String!
 }
 input AvailableDays {
   name: String!

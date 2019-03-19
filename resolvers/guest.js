@@ -12,6 +12,20 @@ const guestResolver = {
     async getCurrentUser(_, args, { User, req }) {
       const userId = getUserId(req);
       return await User.findById(userId);
+    },
+    async searchOffice(_, { name, location, category }, { Office }) {
+      console.log('name',name)
+      console.log('location',location)
+      if(!name && !location){
+        throw new Error('Enter at least one field!');
+      }
+      const condtion = {};
+      if(name) condtion.name = name;
+      if(location) condtion.location = location;
+      if(category) condtion.category = category;
+      return await Office.find({location:{lat:21.0133687}}).populate({
+        path: 'location'
+      });
     }
   },
   Mutation: {
