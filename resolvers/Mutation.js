@@ -1,12 +1,7 @@
 const { hashPassword, createToken, getUserId } = require('../utils');
 const bcryptjs = require('bcryptjs')
 const Mutation = {
-    async signup(_, {
-        email,
-        password
-    }, {
-        User
-    }) {
+    async signup(_, {email, password}, {User}) {
         const user = await User.findOne({
             email
         });
