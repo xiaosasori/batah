@@ -13,17 +13,19 @@ const guestResolver = {
       const userId = getUserId(req);
       return await User.findById(userId);
     },
-    async searchOffice(_, { name, location, category }, { Office }) {
-      console.log('name',name)
+    async searchOffice(_, { title, location, category }, { Office, Location }) {
+      console.log('title',title)
       console.log('location',location)
-      if(!name && !location){
+      if(!title && !location){
         throw new Error('Enter at least one field!');
       }
       const condtion = {};
-      if(name) condtion.name = name;
+      if(title) condtion.title = title;
       if(location) condtion.location = location;
       if(category) condtion.category = category;
-      return await Office.find({location:{lat:21.0133687}}).populate({
+      const foundLocation = await Location.find({lat: 15.9785431}).select('_id')
+      console.log(foundLocation)
+      return await Office.find({location: {$in: foundLocation}}).populate({
         path: 'location'
       });
     }

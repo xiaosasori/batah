@@ -228,7 +228,7 @@ type Query {
   me: User!
   getCurrentUser: User
   searchLocation(address: String!, lat: Int!, lng: Int!): [Location!]
-  searchOffice(name: String, location: LocationInput, category: String): [Office!]
+  searchOffice(title: String, location: LocationInput, category: String): [Office!]
 }
 
 type Mutation {
@@ -267,8 +267,8 @@ type Mutation {
   ): Office!
 }
 input LocationInput {
-  lat: Int
-  lng: Int
+  lat: Float
+  lng: Float
   address: String
 }
 
