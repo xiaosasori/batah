@@ -20,14 +20,13 @@ const guestResolver = {
         throw new Error('Enter at least one field!');
       }
       const condtion = {};
-      if(title) condtion.title = title;
-      if(location) condtion.location = location;
-      if(category) condtion.category = category;
-      const foundLocation = await Location.find({lat: 15.9785431}).select('_id')
-      console.log(foundLocation)
-      return await Office.find({location: {$in: foundLocation}}).populate({
-        path: 'location'
-      });
+      if(title) condtion.title = { "$regex": title, "$options": "i" };
+      if(location) {
+        const foundLocation = await Location.find(location).select('_id')
+        condtion.location = foundLocation;
+      }
+      if(category) condtion.category = category;  
+      return await Office.find(condtion);
     }
   },
   Mutation: {
