@@ -13,6 +13,10 @@ const guestResolver = {
       const userId = getUserId(req);
       return await User.findById(userId);
     },
+    async getOffice(_, args, {User, Office, req}){
+      const res = await Office.findOne({_id: args.id}).populate('pricing location officeRules')
+      return res
+    },
     async searchOffice(_, { title, location, category }, { Office, Location, Pricing }) {
 
       // titile
