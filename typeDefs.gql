@@ -21,11 +21,15 @@ type User {
 type Office {
   id: ID!
   title: String!
+  address: String!
   category: String!
   description: String!
   size: Int!
+  phone: String
+  website: String
+  email: String
   numSeats: Int!
-  reviews: [Review!]!
+  reviews: [Review!]
   amenities: [String!]!
   host: User!
   pricing: Pricing!
@@ -108,17 +112,17 @@ type Review {
   createdAt: String!
   text: String!
   stars: Int!
-  accuracy: Int!
-  location: Int!
-  checkIn: Int!
-  cleanliness: Int!
-  office: Office!
+  accuracy: Int
+  location: Int
+  checkIn: Int
+  cleanliness: Int
+  office: Office
 }
 
 type AvailableSchedule {
   id: ID!
-  availableDate: String!
-  availableHour: [Slot!]!
+  date: String!
+  slots: [Slot!]!
 }
 type Slot {
   start: String!
@@ -229,6 +233,8 @@ type Query {
   getCurrentUser: User
   searchLocation(address: String!, lat: Int!, lng: Int!): [Location!]
   searchOffice(title: String, location: LocationInput, category: String): [Office!]
+  getOffices: [Office!] 
+  getOffice(id: String!): Office!
 }
 
 type Mutation {

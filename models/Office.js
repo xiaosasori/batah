@@ -11,6 +11,10 @@ const PlaceSchema = new mongoose.Schema({
     shortDescription: {
         type: String
     },
+    address: {
+        type: String,
+        required: true
+    },
     description: {
         type: String,
         required: true

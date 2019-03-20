@@ -14,20 +14,31 @@ const guestResolver = {
       return await User.findById(userId);
     },
     async searchOffice(_, { title, location, category }, { Office, Location }) {
-      console.log('title',title)
-      console.log('location',location)
       if(!title && !location){
         throw new Error('Enter at least one field!');
       }
       const condtion = {};
       if(title) condtion.title = title;
-      if(location) condtion.location = location;
+      if(location) {
+        const foundLocation = await Location.find(location).select('_id')
+        console.log(foundLocation)
+        condtion.location = foundLocation;
+      }
       if(category) condtion.category = category;
-      const foundLocation = await Location.find({lat: 15.9785431}).select('_id')
-      console.log(foundLocation)
-      return await Office.find({location: {$in: foundLocation}}).populate({
+
+      return await Office.find(condtion).populate({
         path: 'location'
       });
+    },
+    async getOffice(_, args, {Office}){
+      const office = await Office.findOne({_id: args.id}).populate([{
+        path: 'pricing'
+      }, {
+        path: 'officeRules'
+      }, {
+        path: 'location'
+      }])
+      return office
     }
   },
   Mutation: {
@@ -41,7 +52,8 @@ const guestResolver = {
         firstName,
         lastName,
         password: hashedPassword,
-        email
+        email,
+        avatar: `http://gravatar.com/avatar/${email}?d=identicon`
       }).save();
       return {
         user: newUser,
