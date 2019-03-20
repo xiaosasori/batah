@@ -1,6 +1,12 @@
 const {getUserId, getDaysLeftInMonth} = require('../utils');
 const hostResolver = {
-  Query: {},
+  Query: {
+    async getOffices(_, args, {User, Office, req}){
+      const userId = getUserId(req);
+      const res = await Office.find({host: userId})
+      return res
+    }
+  },
   Mutation: {
     async createList(
       _,
