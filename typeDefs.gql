@@ -223,12 +223,9 @@ type Query {
   getCurrentUser: User
   searchLocation(address: String!, lat: Int!, lng: Int!): [Location!]
   searchOffice(title: String, location: LocationInput, category: String): [Office!]
-<<<<<<< HEAD
   getOffices: [Office!] 
   getOffice(id: String!): Office!
-=======
   searchOfficeByFilter(id: [ID!]!, minSize: Int, maxSize: Int, minNumSeats: Int, maxNumSeats: Int, minPrice: Int, maxPice: Int, amenities: [String!]): [Office!]
->>>>>>> b35b2987bc01c368f9a3854181d43336989e6c07
 }
 
 type Mutation {
