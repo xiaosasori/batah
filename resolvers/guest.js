@@ -130,7 +130,28 @@ const guestResolver = {
         { new: true }
       );
       return user;
-    }
+    },
+    async createBooking(_, { bookee, office, bookedSchedules, payment }, { Booking, req }) {
+      const userId = getUserId(req);
+      const newBooking = await new Booking({
+        bookee: userId,
+        office,
+        bookedSchedules,
+        payment
+      }).save()
+      return {
+        newBooking
+      }
+    },
+    async createBookedSchedule(_, { bookedDate, bookedHour }, { BookedSchedule }) {
+      const newBookedSchedule = await new BookedSchedule({
+        bookedDate,
+        bookedHour
+      }).save()
+      return {
+        newBookedSchedule
+      }
+    },
   }
 }
 

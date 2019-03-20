@@ -1,6 +1,6 @@
 type User {
   id: ID!
-  createdAt: String!
+  joinDate: String!
   updatedAt: String!
   firstName: String!
   lastName: String!
@@ -120,7 +120,6 @@ type Slot {
 }
 type BookedSchedule {
   id: ID!
-  booking: Booking!
   bookedDate: String!
   bookedHour: Slot!
 }
@@ -262,6 +261,16 @@ type Mutation {
     schedule: [AvailableDays!]!
     pictures: [String!]!
   ): Office!
+  createBooking(
+    bookee: ID!
+    office: ID!
+    bookedSchedules: [ID!]!
+    payment: ID
+  ): Booking!
+  createBookedSchedule(
+    bookedDate: String!
+    bookedHour: [SlotInput!]!
+  ): BookedSchedule
 }
 
 input LocationInput {
