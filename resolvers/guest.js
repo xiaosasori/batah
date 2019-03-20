@@ -15,16 +15,18 @@ const guestResolver = {
     },
     async searchOffice(_, { title, location, category }, { Office, Location, Pricing }) {
 
-      // titile
       if(!title && !location){
         throw new Error('Enter at least one field!');
       }
       const condition = {};
+      // titile
       if(title) condition.title = { "$regex": title, "$options": "i" };
+      // location
       if(location) {
         const foundLocation = await Location.find(location).select('_id')
         condition.location = foundLocation;
       }
+      // category
       if(category) condition.category = category;  
       return await Office.find(condition);
     },
