@@ -1,8 +1,8 @@
 const mongoose = require('mongoose')
 const ReviewSchema = new mongoose.Schema({
     createdAt: {
-        type: String,
-        required: true
+        type: Date,
+        default: Date.now
     },
     text: {
         type: String,
@@ -12,26 +12,15 @@ const ReviewSchema = new mongoose.Schema({
         type: Number,
         required: true
     },
-    accuracy: {
-        type: Number,
-        required: true
-    },
-    location: {
-        type: Number,
-        required: true
-    },
-    checkIn: {
-        type: Number,
-        required: true
-    },
-    cleanliness: {
-        type: Number,
-        required: true
-    },
-    place: {
+    office: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'Place',
+        ref: 'Office',
         required: true
     },
+    user: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+        required: true
+    }
 })
 module.exports = mongoose.model('Review', ReviewSchema)

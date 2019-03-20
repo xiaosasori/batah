@@ -1,12 +1,12 @@
 type User {
   id: ID!
-  createdAt: String!
+  joinDate: String!
   updatedAt: String!
   firstName: String!
   lastName: String!
   email: String!
   password: String!
-  phone: String!
+  phone: String
   ownedOffices: [Office!]!
   location: Location
   bookings: [Booking!]!
@@ -102,11 +102,8 @@ type Review {
   createdAt: String!
   text: String!
   stars: Int!
-  accuracy: Int
-  location: Int
-  checkIn: Int
-  cleanliness: Int
-  office: Office
+  office: Office!
+  user: User!
 }
 
 type AvailableSchedule {
@@ -120,7 +117,6 @@ type Slot {
 }
 type BookedSchedule {
   id: ID!
-  booking: Booking!
   bookedDate: String!
   bookedHour: Slot!
 }
@@ -262,6 +258,10 @@ type Mutation {
     schedule: [AvailableDays!]!
     pictures: [String!]!
   ): Office!
+  createReview(text: String!
+    stars: Int!
+    office: String!
+    user: String!): Review!
 }
 
 input LocationInput {

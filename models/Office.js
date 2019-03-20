@@ -39,10 +39,10 @@ const PlaceSchema = new mongoose.Schema({
     tags: {
         type: Array
     },
-    reviews: {
-        type: [mongoose.Schema.Types.ObjectId],
+    reviews: [{
+        type: mongoose.Schema.Types.ObjectId,
         ref: 'Review',
-    },
+    }],
     amenities: {
         type: Array,
         required: true

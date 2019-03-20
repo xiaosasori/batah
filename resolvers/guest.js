@@ -13,9 +13,23 @@ const guestResolver = {
       const userId = getUserId(req);
       return await User.findById(userId);
     },
-    async getOffice(_, args, {User, Office, req}){
-      const res = await Office.findOne({_id: args.id}).populate('pricing location officeRules')
-      return res
+    async getOffice(_, args, {Office, Review}){
+      const office = await Office.findOne({_id: args.id}).populate([{
+        path: 'pricing'
+      },{
+        path: 'location'
+      },{
+        path: 'officeRules'
+      }, {
+        path: 'host'
+      },{
+        path: 'reviews',
+        populate: {
+          path: 'user',
+          select: 'firstName lastName avatar'
+        }
+      }])
+      return office
     },
     async searchOffice(_, { title, location, category }, { Office, Location, Pricing }) {
 
@@ -128,6 +142,15 @@ const guestResolver = {
         { new: true }
       );
       return user;
+    },
+    async createReview(_, {text,stars,office,user}, {User, Office, Review, req}){
+      const userId = getUserId(req)
+      //need to check if user has booked this
+      const newReview =  await new Review({text,stars,office,user}).save()
+      await Office.findOneAndUpdate({_id: office},{ $push: {reviews:{$each: [newReview._id]}} })
+      const result = await Review.findById(newReview._id).populate('user','firstName lastName avatar')
+      // user can only review onece per order
+      return result
     }
   }
 }
