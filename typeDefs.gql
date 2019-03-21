@@ -258,12 +258,10 @@ type Mutation {
     schedule: [AvailableDays!]!
     pictures: [String!]!
   ): Office!
-<<<<<<< HEAD
   createReview(text: String!
     stars: Int!
     office: String!
     user: String!): Review!
-=======
   createBooking(
     bookee: ID!
     office: ID!
@@ -274,7 +272,6 @@ type Mutation {
     bookedDate: String!
     bookedHour: [SlotInput!]!
   ): BookedSchedule
->>>>>>> 11b25a57545e1ea23b56cf6824ce2331da90b44b
 }
 
 input LocationInput {
