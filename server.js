@@ -6,7 +6,12 @@ const Office = require('./models/Office')
 const Location = require('./models/Location')
 const Pricing = require('./models/Pricing')
 const OfficeRules = require('./models/OfficeRules')
+<<<<<<< HEAD
 const Review = require('./models/Review')
+=======
+const BookedSchedule = require('./models/BookedSchedule')
+const Booking = require('./models/Booking')
+>>>>>>> 11b25a57545e1ea23b56cf6824ce2331da90b44b
 
 // import models
 require('dotenv').config({path: 'variables.env'})
@@ -40,7 +45,12 @@ const server = new ApolloServer({
       Location,
       Pricing,
       OfficeRules,
+<<<<<<< HEAD
       Review,
+=======
+      BookedSchedule,
+      Booking,
+>>>>>>> 11b25a57545e1ea23b56cf6824ce2331da90b44b
       req
     }
   }

@@ -33,16 +33,18 @@ const guestResolver = {
     },
     async searchOffice(_, { title, location, category }, { Office, Location, Pricing }) {
 
-      // titile
       if(!title && !location){
         throw new Error('Enter at least one field!');
       }
       const condition = {};
+      // titile
       if(title) condition.title = { "$regex": title, "$options": "i" };
+      // location
       if(location) {
         const foundLocation = await Location.find(location).select('_id')
         condition.location = foundLocation;
       }
+      // category
       if(category) condition.category = category;  
       return await Office.find(condition);
     },
@@ -151,7 +153,28 @@ const guestResolver = {
       const result = await Review.findById(newReview._id).populate('user','firstName lastName avatar')
       // user can only review onece per order
       return result
-    }
+    },
+    async createBooking(_, { bookee, office, bookedSchedules, payment }, { Booking, req }) {
+      const userId = getUserId(req);
+      const newBooking = await new Booking({
+        bookee: userId,
+        office,
+        bookedSchedules,
+        payment
+      }).save()
+      return {
+        newBooking
+      }
+    },
+    async createBookedSchedule(_, { bookedDate, bookedHour }, { BookedSchedule }) {
+      const newBookedSchedule = await new BookedSchedule({
+        bookedDate,
+        bookedHour
+      }).save()
+      return {
+        newBookedSchedule
+      }
+    },
   }
 }
 
