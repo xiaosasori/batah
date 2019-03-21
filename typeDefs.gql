@@ -23,6 +23,7 @@ type Office {
   title: String!
   address: String!
   category: String!
+  shortDescription: String!
   description: String!
   size: Int!
   phone: String
@@ -101,7 +102,11 @@ type Review {
   id: ID!
   createdAt: String!
   text: String!
-  stars: Int!
+  stars: Float!
+  cleanliness: Int!
+  accurracy: Int!
+  location: Int!
+  checkIn: Int!
   office: Office!
   user: User!
 }
@@ -267,7 +272,10 @@ type Mutation {
     pictures: [String!]!
   ): Office!
   createReview(text: String!
-    stars: Int!
+    cleanliness: Int!
+    accurracy: Int!
+    location: Int!
+    checkIn: Int!
     office: String!
     user: String!): Review!
   createBooking(

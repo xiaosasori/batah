@@ -8,6 +8,22 @@ const ReviewSchema = new mongoose.Schema({
         type: String,
         required: true
     },
+    cleanliness: {
+        type: Number,
+        required: true
+    },
+    accurracy: {
+        type: Number,
+        required: true
+    },
+    location: {
+        type: Number,
+        required: true
+    },
+    checkIn: {
+        type: Number,
+        required: true
+    },
     stars: {
         type: Number,
         required: true

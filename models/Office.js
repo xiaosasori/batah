@@ -9,7 +9,8 @@ const PlaceSchema = new mongoose.Schema({
         required: true
     },
     shortDescription: {
-        type: String
+        type: String,
+        required: true
     },
     address: {
         type: String,

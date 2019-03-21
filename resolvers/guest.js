@@ -53,6 +53,8 @@ const guestResolver = {
         path: 'location'
       },{
         path: 'officeRules'
+      }, {
+        path: 'reviews'
       }]);
     },
     async searchOfficeByFilter(_, { id, minSize, maxSize, minNumSeats, maxNumSeats, minPrice, maxPrice, amenities }, { Office, Pricing }) {
@@ -152,10 +154,11 @@ const guestResolver = {
       );
       return user;
     },
-    async createReview(_, {text,stars,office,user}, {User, Office, Review, req}){
+    async createReview(_, {text,cleanliness,accurracy, location, checkIn,office,user}, {User, Office, Review, req}){
       const userId = getUserId(req)
       //need to check if user has booked this
-      const newReview =  await new Review({text,stars,office,user}).save()
+      const stars= ((cleanliness+accurracy+ location+ checkIn)/4).toFixed(2)
+      const newReview =  await new Review({text,stars,cleanliness,accurracy, location, checkIn,office,user}).save()
       await Office.findOneAndUpdate({_id: office},{ $push: {reviews:{$each: [newReview._id]}} })
       const result = await Review.findById(newReview._id).populate('user','firstName lastName avatar')
       // user can only review onece per order
