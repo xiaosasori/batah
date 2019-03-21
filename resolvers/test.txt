@@ -1,0 +1,35 @@
+query{
+  searchOffice(searchTerm: "sfs", area: {ga:{from:0,to:1000},ma:{from:0,to:1000}}){
+    id
+    title
+  }
+  searchOfficeByFilter(id:["5c9072f82e5e350580be85a8"], minNumSeats:1, maxNumSeats:20, amenities: ["airConditioning"]){
+    id
+    title
+  }
+}	
+mutation {
+  createBookedSchedule(office: "5c90af9073c36f0e0ca0f1f1", date: "2018/03/30", slots: [1,2,5]){
+    date
+    slots
+  }
+  createAvailableSchedule(office: "5c90af9073c36f0e0ca0f1f1", date: "2018/03/30", slots: [1,2,5]){
+    date
+    slots
+  }
+  createCreditCardInformation(cardNumber: "123", expiresOnYear: 2020, expiresOnMonth: 5, securityCode: "123456789", fullName: "Hoang Van Hiep", country: "VietNam"){
+    id
+  }
+  createPaypalInformation(email: "hiepnb97@gmail.com"){
+    id
+  }
+  createPaymentAccount(type: "PAYPAL", paypal: "5c935886f3db480b60662303", creditcard: "5c935844f3db480b60662302"){
+    id
+    createdAt
+    type
+  }
+  createPayment(serviceFee: 10, officePrice: 100, numHours: 4, paymentMethod: "5c9358fef3db480b60662304"){
+    id
+    totalPrice
+  }
+}

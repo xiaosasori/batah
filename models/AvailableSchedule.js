@@ -1,5 +1,5 @@
 const mongoose = require('mongoose')
-const BookedScheduleSchema = new mongoose.Schema({
+const AvailableScheduleSchema = new mongoose.Schema({
     office: {
         type: [mongoose.Schema.Types.ObjectId],
         ref: 'Office'
@@ -13,4 +13,4 @@ const BookedScheduleSchema = new mongoose.Schema({
         required: true
     }
 })
-module.exports = mongoose.model('BookedSchedule', BookedScheduleSchema)
+module.exports = mongoose.model('AvailableSchedule', AvailableScheduleSchema)

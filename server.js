@@ -8,7 +8,12 @@ const Pricing = require('./models/Pricing')
 const OfficeRules = require('./models/OfficeRules')
 const Review = require('./models/Review')
 const BookedSchedule = require('./models/BookedSchedule')
+const AvailableSchedule = require('./models/AvailableSchedule')
 const Booking = require('./models/Booking')
+const Payment = require('./models/Payment')
+const PaymentAccount = require('./models/PaymentAccount')
+const PaypalInformation = require('./models/PaypalInformation')
+const CreditCardInformation = require('./models/CreditCardInformation')
 
 // import models
 require('dotenv').config({path: 'variables.env'})
@@ -44,7 +49,12 @@ const server = new ApolloServer({
       OfficeRules,
       Review,
       BookedSchedule,
+      AvailableSchedule,
       Booking,
+      Payment,
+      PaymentAccount,
+      PaypalInformation,
+      CreditCardInformation,
       req
     }
   }

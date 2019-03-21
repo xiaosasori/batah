@@ -8,11 +8,7 @@ const hostResolver = {
     }
   },
   Mutation: {
-    async createList(
-      _,
-      args,
-      { User, Office, Location, Pricing, OfficeRules, req }
-    ) {
+    async createList(_, args, { User, Office, Location, Pricing, OfficeRules, req }) {
       const userId = getUserId(req);
       const newLocation = await new Location(args.location).save();
       const newPricing = await new Pricing(args.pricing).save();
@@ -67,6 +63,14 @@ const hostResolver = {
         { $push: { offices: { $each: [savedOffice._id], $position: 0 } } }
       );
       return savedOffice;
+    },
+    async createAvailableSchedule(_, { office, date, slots }, { AvailableSchedule }) {
+      const newAvailableSchedule = await new AvailableSchedule({
+        office,
+        date : new Date(date),
+        slots
+      }).save()
+      return newAvailableSchedule
     }
   }
 };
