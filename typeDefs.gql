@@ -218,12 +218,20 @@ type Query {
   me: User!
   getCurrentUser: User
   searchLocation(address: String!, lat: Int!, lng: Int!): [Location!]
-  searchOffice(title: String, location: LocationInput, category: String): [Office!]
+  searchOffice(searchTerm: String, area: AreaInput, category: String): [Office!]
   getOffices: [Office!] 
   getOffice(id: String!): Office!
   searchOfficeByFilter(id: [ID!]!, minSize: Int, maxSize: Int, minNumSeats: Int, maxNumSeats: Int, minPrice: Int, maxPice: Int, amenities: [String!]): [Office!]
 }
 
+input AreaInput{
+  ga: BoundInput!
+  ma: BoundInput!
+}
+input BoundInput{
+  from: Float!
+  to: Float!
+}
 type Mutation {
   signup(
     email: String!

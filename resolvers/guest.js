@@ -31,22 +31,29 @@ const guestResolver = {
       }])
       return office
     },
-    async searchOffice(_, { title, location, category }, { Office, Location, Pricing }) {
+    async searchOffice(_, { searchTerm, area, category }, { Office, Location, Pricing }) {
 
-      if(!title && !location){
+      if(!searchTerm && !area){
         throw new Error('Enter at least one field!');
       }
+      console.log(area)
       const condition = {};
       // titile
-      if(title) condition.title = { "$regex": title, "$options": "i" };
+      if(searchTerm) condition.title = { "$regex": searchTerm, "$options": "i" };
       // location
-      if(location) {
-        const foundLocation = await Location.find(location).select('_id')
-        condition.location = foundLocation;
-      }
+      // if(location) {
+      //   const foundLocation = await Location.find(location).select('_id')
+      //   condition.location = foundLocation;
+      // }
       // category
-      if(category) condition.category = category;  
-      return await Office.find(condition);
+      if(category && category!=='all') condition.category = category;  
+      return await Office.find(condition).populate([{
+        path: 'pricing'
+      },{
+        path: 'location'
+      },{
+        path: 'officeRules'
+      }]);
     },
     async searchOfficeByFilter(_, { id, minSize, maxSize, minNumSeats, maxNumSeats, minPrice, maxPrice, amenities }, { Office, Pricing }) {
       const condition = {};
