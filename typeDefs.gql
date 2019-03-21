@@ -109,16 +109,13 @@ type Review {
 type AvailableSchedule {
   id: ID!
   date: String!
-  slots: [Slot!]!
+  slots: [Int!]!
 }
-type Slot {
-  start: String!
-  end: String!
-}
+
 type BookedSchedule {
   id: ID!
-  bookedDate: String!
-  bookedHour: Slot!
+  date: String!
+  slots: [Int!]!
 }
 
 type Booking {
@@ -277,9 +274,13 @@ type Mutation {
     payment: ID
   ): Booking!
   createBookedSchedule(
-    bookedDate: String!
-    bookedHour: [SlotInput!]!
-  ): BookedSchedule
+    date: String!
+    slots: [Int!]!
+  ): BookedSchedule!
+  createAvailableSchedule(
+    date: String!
+    slots: [Int!]!
+  ): AvailableSchedule!
 }
 
 input LocationInput {

@@ -31,7 +31,7 @@ const guestResolver = {
       }])
       return office
     },
-    async searchOffice(_, { searchTerm, area, category }, { Office, Location, Pricing }) {
+    async searchOffice(_, { searchTerm, area, category }, { Office, Location }) {
 
       if(!searchTerm && !area){
         throw new Error('Enter at least one field!');
@@ -39,12 +39,19 @@ const guestResolver = {
       console.log(area)
       const condition = {};
       // titile
-      if(searchTerm) condition.title = { "$regex": searchTerm, "$options": "i" };
-      // location
-      // if(location) {
-      //   const foundLocation = await Location.find(location).select('_id')
-      //   condition.location = foundLocation;
-      // }
+      if(searchTerm){
+        condition.title = { "$regex": searchTerm, "$options": "i" };
+      }
+
+      // area
+      if(area){
+        const foundLocation = await Location.find({
+          lat: { $gte: area.ga.from, $lte: area.ga.to },
+          lng: { $gte: area.ma.from, $lte: area.ma.to }
+        })
+        condition.location = { $in: foundLocation }
+      }
+
       // category
       if(category && category!=='all') condition.category = category;  
       return await Office.find(condition).populate([{
@@ -161,7 +168,7 @@ const guestResolver = {
       // user can only review onece per order
       return result
     },
-    async createBooking(_, { bookee, office, bookedSchedules, payment }, { Booking, req }) {
+    async createBooking(_, { office, bookedSchedules, payment }, { Booking, req }) {
       const userId = getUserId(req);
       const newBooking = await new Booking({
         bookee: userId,
@@ -173,15 +180,15 @@ const guestResolver = {
         newBooking
       }
     },
-    async createBookedSchedule(_, { bookedDate, bookedHour }, { BookedSchedule }) {
+    async createBookedSchedule(_, { date, slots }, { BookedSchedule }) {
       const newBookedSchedule = await new BookedSchedule({
-        bookedDate,
-        bookedHour
+        date,
+        slots
       }).save()
       return {
         newBookedSchedule
       }
-    },
+    }
   }
 }
 
