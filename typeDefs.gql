@@ -40,7 +40,6 @@ type Office {
   bookings: [Booking!]!
   pictures: [String!]!
   popularity: Int!
-  availableSchedule: [AvailableSchedule!]!,
   tags: [String!]!
 }
 
@@ -108,12 +107,14 @@ type Review {
 
 type AvailableSchedule {
   id: ID!
+  office: ID!
   date: String!
   slots: [Int!]!
 }
 
 type BookedSchedule {
   id: ID!
+  office: ID!
   date: String!
   slots: [Int!]!
 }
@@ -133,16 +134,13 @@ type Payment {
   serviceFee: Float!
   officePrice: Float!
   totalPrice: Float!
-  booking: Booking!
   paymentMethod: PaymentAccount!
 }
 
 type PaymentAccount {
   id: ID!
   createdAt: String!
-  type: PAYMENT_PROVIDER
-  user: User!
-  payments: [Payment!]!
+  type: String! #PAYMENT_PROVIDER
   paypal: PaypalInformation
   creditcard: CreditCardInformation
 }
@@ -151,7 +149,6 @@ type PaypalInformation {
   id: ID!
   createdAt: String!
   email: String!
-  paymentAccount: PaymentAccount!
 }
 
 type CreditCardInformation {
@@ -161,11 +158,8 @@ type CreditCardInformation {
   expiresOnMonth: Int!
   expiresOnYear: Int!
   securityCode: String!
-  firstName: String!
-  lastName: String!
-  postalCode: String!
+  fullName: String!
   country: String!
-  paymentAccount: PaymentAccount
 }
 
 type Message {
@@ -219,6 +213,7 @@ type Query {
   getOffices: [Office!] 
   getOffice(id: String!): Office!
   searchOfficeByFilter(id: [ID!]!, minSize: Int, maxSize: Int, minNumSeats: Int, maxNumSeats: Int, minPrice: Int, maxPice: Int, amenities: [String!]): [Office!]
+  getAvailableSchedule(office: ID!, startDate: String!, endDate: String!): [AvailableSchedule!]
 }
 
 input AreaInput{
@@ -268,19 +263,42 @@ type Mutation {
     office: String!
     user: String!): Review!
   createBooking(
-    bookee: ID!
     office: ID!
     bookedSchedules: [ID!]!
     payment: ID
   ): Booking!
   createBookedSchedule(
+    office: ID!
     date: String!
     slots: [Int!]!
   ): BookedSchedule!
   createAvailableSchedule(
+    office: ID!
     date: String!
     slots: [Int!]!
   ): AvailableSchedule!
+  createPayment(
+    serviceFee: Float!
+    officePrice: Float!
+    numHours: Int!
+    paymentMethod: ID!
+  ): Payment!
+  createPaymentAccount(
+    type: String!
+    paypal: ID
+    creditcard: ID
+  ): PaymentAccount!
+  createPaypalInformation(
+    email: String!
+  ): PaypalInformation!
+  createCreditCardInformation(
+    cardNumber: String!
+    expiresOnMonth: Int!
+    expiresOnYear: Int!
+    securityCode: String!
+    fullName: String!
+    country: String!
+  ): CreditCardInformation!
 }
 
 input LocationInput {

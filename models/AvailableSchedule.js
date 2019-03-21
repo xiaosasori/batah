@@ -1,7 +1,11 @@
 const mongoose = require('mongoose')
 const AvailableScheduleSchema = new mongoose.Schema({
+    office: {
+        type: [mongoose.Schema.Types.ObjectId],
+        ref: 'Office'
+    },
     date: {
-        type: String,
+        type: Date,
         required: true
     },
     slots: {

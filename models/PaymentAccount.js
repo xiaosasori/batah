@@ -1,21 +1,11 @@
 const mongoose = require('mongoose')
 const PaymentAccountSchema = new mongoose.Schema({
     createdAt: {
-        type: String,
-        required: true
+        type: Date,
+        default: Date.now
     },
     type: {
         type: String
-    },
-    user: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'User',
-        required: true
-    },
-    payments: {
-        type: [mongoose.Schema.Types.ObjectId],
-        ref: 'Payment',
-        required: true
     },
     paypal: {
         type: mongoose.Schema.Types.ObjectId,

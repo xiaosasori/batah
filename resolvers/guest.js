@@ -86,7 +86,32 @@ const guestResolver = {
         condition.amenities = { $all: amenities };
       }
       return Office.find(condition);
+    },
+    async getAvailableSchedule(_, {office, startDate, endDate},{ AvailableSchedule, BookedSchedule }){
+      // get current AvailableSchedule
+      let currentAvailableSchedule = await AvailableSchedule.find({
+        office,
+        date: {$gte: new Date(startDate),  $lte: new Date(endDate) }
+      });
+
+      // delete slots in each day
+      currentAvailableSchedule.forEach(async element => {
+        // get booked slots
+        const bookedSlots = await BookedSchedule.find({
+          office,
+          date: element.date
+        }).select('slots')
+
+        // delete slot in AvailableSchedule
+        bookedSlots.forEach(async element2 => {
+          console.log(element2)
+          element.slots.splice(element.slots.indexOf(element2), 1)
+        });
+      });
+
+      return currentAvailableSchedule
     }
+
   },
   Mutation: {
     async signup(_, { email, password, firstName, lastName }, { User }) {
@@ -176,19 +201,51 @@ const guestResolver = {
         bookedSchedules,
         payment
       }).save()
-      return {
-        newBooking
-      }
+      return newBooking
     },
-    async createBookedSchedule(_, { date, slots }, { BookedSchedule }) {
+    async createBookedSchedule(_, { office, date, slots }, { BookedSchedule }) {
       const newBookedSchedule = await new BookedSchedule({
-        date,
+        office,
+        date : new Date(date),
         slots
       }).save()
-      return {
-        newBookedSchedule
-      }
+      return newBookedSchedule
+    },
+    async createPayment(_, { serviceFee, officePrice, numHours, paymentMethod }, { Payment }) {
+      const newPayment = await new Payment({
+        serviceFee,
+        officePrice,
+        totalPrice : officePrice * numHours * ( 1 + serviceFee/100 ),
+        paymentMethod,
+      }).save()
+      return newPayment
+    },
+    async createPaymentAccount(_, { type, paypal, creditcard }, { PaymentAccount }) {
+      const newPaymentAccount = await new PaymentAccount({
+        type,
+        paypal,
+        creditcard
+      }).save()
+      return newPaymentAccount
+    },
+    async createPaypalInformation(_, { email }, { PaypalInformation }) {
+      const newPaypalInformation = await new PaypalInformation({
+        email
+      }).save()
+      return newPaypalInformation
+    },
+    async createCreditCardInformation(_, { cardNumber, expiresOnMonth, expiresOnYear, securityCode, fullName, country }, { CreditCardInformation }) {
+      const newCreditCardInformation = await new CreditCardInformation({
+        cardNumber,
+        expiresOnMonth,
+        expiresOnYear,
+        securityCode,
+        fullName,
+        country
+      }).save()
+      return newCreditCardInformation
     }
+
   }
 }
 

@@ -64,14 +64,13 @@ const hostResolver = {
       );
       return savedOffice;
     },
-    async createAvailableSchedule(_, { date, slots }, { AvailableSchedule }) {
+    async createAvailableSchedule(_, { office, date, slots }, { AvailableSchedule }) {
       const newAvailableSchedule = await new AvailableSchedule({
-        date,
+        office,
+        date : new Date(date),
         slots
       }).save()
-      return {
-        newAvailableSchedule
-      }
+      return newAvailableSchedule
     }
   }
 };

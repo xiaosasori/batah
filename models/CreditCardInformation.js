@@ -1,8 +1,8 @@
 const mongoose = require('mongoose')
 const CreditCardInformationSchema = new mongoose.Schema({
     createdAt: {
-        type: String,
-        required: true
+        type: Date,
+        default: Date.now
     },
     cardNumber: {
         type: String,
@@ -20,25 +20,13 @@ const CreditCardInformationSchema = new mongoose.Schema({
         type: String,
         required: true
     },
-    firstName: {
-        type: String,
-        required: true
-    },
-    lastName: {
-        type: String,
-        required: true
-    },
-    postalCode: {
+    fullName: {
         type: String,
         required: true
     },
     country: {
         type: String,
         required: true
-    },
-    paymentAccount: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'PaymentAccount'
-    },
+    }
 })
 module.exports = mongoose.model('CreditCardInformation', CreditCardInformationSchema)

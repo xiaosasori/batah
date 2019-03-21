@@ -1,24 +1,19 @@
 const mongoose = require('mongoose')
 const PaymentSchema = new mongoose.Schema({
     createdAt: {
-        type: String,
-        required: true
+        type: Date,
+        default: Date.now
     },
     serviceFee: {
         type: Number/*float*/,
         required: true
     },
-    placePrice: {
+    officePrice: {
         type: Number/*float*/,
         required: true
     },
     totalPrice: {
         type: Number/*float*/,
-        required: true
-    },
-    booking: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Booking',
         required: true
     },
     paymentMethod: {
