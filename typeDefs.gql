@@ -222,12 +222,12 @@ type Query {
 }
 
 input AreaInput{
-  ga: BoundInput!
-  ma: BoundInput!
+  ga: BoundInput
+  ma: BoundInput
 }
 input BoundInput{
-  from: Float!
-  to: Float!
+  from: Float
+  to: Float
 }
 type Mutation {
   signup(
@@ -251,6 +251,7 @@ type Mutation {
     category: String!
     address: String!
     description: String!
+    shortDescription: String!
     phone: String!
     website: String
     email: String
@@ -322,12 +323,8 @@ input RuleInput {
   smokingAllowed: Boolean! partiesAndEventsAllowed:Boolean! additionalRules:String
 }
 input AvailableDays {
-  name: String!
-  availableHour: [SlotInput!]
-}
-input SlotInput {
-  start: String!
-  end: String!
+  date: String!
+  slots: [Int!]!
 }
 type Token {
   token: String!

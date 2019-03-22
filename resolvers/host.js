@@ -3,17 +3,18 @@ const hostResolver = {
   Query: {
     async getOffices(_, args, {User, Office, req}){
       const userId = getUserId(req);
-      const res = await Office.find({host: userId})
+      const res = await Office.find({host: userId}).populate('reviews')
       return res
     }
   },
   Mutation: {
-    async createList(_, args, { User, Office, Location, Pricing, OfficeRules, req }) {
+    async createList(_, args, { User, Office, Location, Pricing, OfficeRules, AvailableSchedule, req }) {
       const userId = getUserId(req);
       const newLocation = await new Location(args.location).save();
       const newPricing = await new Pricing(args.pricing).save();
       const newOfficeRules = await new OfficeRules(args.officeRules).save();
 
+      /*
       const schedule = args.schedule;
       const daysLeft = getDaysLeftInMonth();
       let availableSchedule = [];
@@ -47,22 +48,25 @@ const hostResolver = {
           availableSchedule.push({ date: day, slots: tmp.availableHour });
         }
       });
-
+      */
       const newOffice = {
         ...args,
         officeRules: newOfficeRules._id,
         location: newLocation._id,
         pricing: newPricing._id,
-        availableSchedule,
         host: userId
       };
 
       const savedOffice = await new Office(newOffice).save();
+      // console.log(args.schedule)
+      await AvailableSchedule({schedule: args.schedule,office: savedOffice._id}).save()
+
       await User.findOneAndUpdate(
         { _id: userId },
         { $push: { offices: { $each: [savedOffice._id], $position: 0 } } }
       );
       return savedOffice;
+      // return newOffice
     },
     async createAvailableSchedule(_, { office, date, slots }, { AvailableSchedule }) {
       const newAvailableSchedule = await new AvailableSchedule({

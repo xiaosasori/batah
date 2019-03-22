@@ -91,18 +91,9 @@ const PlaceSchema = new mongoose.Schema({
     popularity: {
         type: Number
     },
-    availableSchedule: [{
-        date: {
-            type: Date
-        },
-        slots: [{
-            start: {
-                type: String
-            },
-            end: {
-                type: String
-            }
-        }]
-    }],
+    availableSchedule: {
+        type:[mongoose.Schema.Types.ObjectId],
+        ref: 'AvailableSchedule'
+    },
 })
 module.exports = mongoose.model('Office', PlaceSchema)

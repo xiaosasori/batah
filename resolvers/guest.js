@@ -36,7 +36,6 @@ const guestResolver = {
       if(!searchTerm && !area){
         throw new Error('Enter at least one field!');
       }
-      console.log(area)
       const condition = {};
       // titile
       if(searchTerm){
@@ -45,9 +44,10 @@ const guestResolver = {
 
       // area
       if(area){
+        console.log('area', area)
         const foundLocation = await Location.find({
-          lat: { $gte: area.ga.from, $lte: area.ga.to },
-          lng: { $gte: area.ma.from, $lte: area.ma.to }
+          lat: { $gte: area.ma.from, $lte: area.ma.to },
+          lng: { $gte: area.ga.from, $lte: area.ga.to }
         })
         condition.location = { $in: foundLocation }
       }
