@@ -2,16 +2,16 @@ const {
   hashPassword,
   createToken,
   getUserId
-} = require('../utils');
-const bcryptjs = require('bcryptjs');
-const { OAuth2Client } = require('google-auth-library');
-const CLIENT_ID = '131089285485-c6aep24hbqq39l6ftd5mnjep5495tssc.apps.googleusercontent.com';
+} = require('../utils')
+const bcryptjs = require('bcryptjs')
+const { OAuth2Client } = require('google-auth-library')
+const CLIENT_ID = '131089285485-c6aep24hbqq39l6ftd5mnjep5495tssc.apps.googleusercontent.com'
 
 const guestResolver = {
   Query: {
     async getCurrentUser(_, args, { User, req }) {
-      const userId = getUserId(req);
-      return await User.findById(userId);
+      const userId = getUserId(req)
+      return await User.findById(userId)
     },
     async getOffice(_, args, {Office, Review}){
       const office = await Office.findOne({_id: args.id}).populate([{
@@ -42,12 +42,12 @@ const guestResolver = {
           path: 'officeRules'
         }, {
           path: 'reviews'
-        }]).limit(4);
+        }]).limit(4)
       }
-      const condition = {};
+      const condition = {}
       // titile
       if(searchTerm){
-        condition.title = { "$regex": searchTerm, "$options": "i" };
+        condition.title = { "$regex": searchTerm, "$options": "i" }
       }
 
       // area
@@ -61,7 +61,7 @@ const guestResolver = {
       }
 
       // category
-      if(category && category!=='all') condition.category = category;  
+      if(category && category!=='all') condition.category = category  
       return await Office.find(condition).populate([{
         path: 'pricing'
       },{
@@ -70,129 +70,133 @@ const guestResolver = {
         path: 'officeRules'
       }, {
         path: 'reviews'
-      }]);
+      }])
     },
     async searchOfficeByFilter(_, { id, minSize, maxSize, minNumSeats, maxNumSeats, minPrice, maxPrice, amenities }, { Office, Pricing }) {
-      const condition = {};
+      const condition = {}
       // id
       if(id){
-        condition._id = {$in: id};
+        condition._id = {$in: id}
       }
       // size
       if(minSize && maxSize && minSize <= maxSize) {
-        condition.size = {  $gte: minSize, $lte: maxSize };
+        condition.size = {  $gte: minSize, $lte: maxSize }
       }
       // numSeats
       if(minNumSeats && maxNumSeats && minNumSeats <= maxNumSeats) {
-        condition.numSeats = {$gte: minNumSeats,  $lte:maxNumSeats };
+        condition.numSeats = {$gte: minNumSeats,  $lte:maxNumSeats }
       }
       // price
       if(minPrice && maxPrice && minPrice <= maxPrice){
         const foundPrice = await Pricing.find({basePrice: { $range: [ minPrice, maxPrice ] }}).select('_id')
-        condition.pricing = foundPrice;
+        condition.pricing = foundPrice
       }
       // amentities
       if(amenities){
-        condition.amenities = { $all: amenities };
+        condition.amenities = { $all: amenities }
       }
-      return Office.find(condition);
+      return Office.find(condition)
     },
     async getAvailableSchedule(_, {office, startDate, endDate},{ AvailableSchedule, BookedSchedule }){
       // get current AvailableSchedule
+      console.log("Function: getAvailableSchedule");
       let currentAvailableSchedule = await AvailableSchedule.find({
         office,
         date: {$gte: new Date(startDate),  $lte: new Date(endDate) }
-      });
+      })
 
       // delete slots in each day
-      currentAvailableSchedule.forEach(async element => {
+      for(element of currentAvailableSchedule){
         // get booked slots
-        const bookedSlots = await BookedSchedule.find({
+        console.log("Day: "+element.date);
+        const bookedSlots = await BookedSchedule.findOne({
           office,
           date: element.date
-        }).select('slots')
-
+        })
         // delete slot in AvailableSchedule
-        bookedSlots.forEach(async element2 => {
-          console.log(element2)
-          element.slots.splice(element.slots.indexOf(element2), 1)
-        });
-      });
+        console.log("slots are needed to delete: "+bookedSlots.slots)
+        console.log("slots before: "+element.slots)
+        for(element2 of bookedSlots.slots){
+          if(element.slots.indexOf(element2)>=0)
+            element.slots.splice(element.slots.indexOf(element2), 1)
+        }
+        console.log("slots after: "+element.slots)
+      }
 
+      console.log("AvailableSchedule result: "+currentAvailableSchedule)
       return currentAvailableSchedule
     }
-
   },
   Mutation: {
     async signup(_, { email, password, firstName, lastName }, { User }) {
-      const user = await User.findOne({ email });
+      const user = await User.findOne({ email })
       if (user) {
-        throw new Error('User already exists');
+        throw new Error('User already exists')
       }
-      const hashedPassword = await hashPassword(password);
+      const hashedPassword = await hashPassword(password)
       const newUser = await new User({
         firstName,
         lastName,
         password: hashedPassword,
         email,
         avatar: `http://gravatar.com/avatar/${email}?d=identicon`
-      }).save();
+      }).save()
       return {
         user: newUser,
         token: createToken(newUser, '1hr')
-      };
+      }
     },
     async login(_, { email, password }, { User }) {
-      const user = await User.findOne({ email });
-      if (!user) throw new Error('User not found');
-      const isValidPassword = await bcryptjs.compare(password, user.password);
-      if (!isValidPassword) throw new Error('Invalid password');
-      return { user, token: createToken(user, '1hr') };
+      const user = await User.findOne({ email })
+      if (!user) throw new Error('User not found')
+      const isValidPassword = await bcryptjs.compare(password, user.password)
+      if (!isValidPassword) throw new Error('Invalid password')
+      return { user, token: createToken(user, '1hr') }
     },
     async loginGoogle(_, { token }, { User }) {
       // console.log('loginGoogle')
-      const client = new OAuth2Client(CLIENT_ID);
+      const client = new OAuth2Client(CLIENT_ID)
       try {
         const ticket = await client.verifyIdToken({
           idToken: token,
           audience: CLIENT_ID
-        });
-        const payload = ticket.getPayload();
-        const email = payload['email'];
-        const user = await User.findOne({ email });
+        })
+        const payload = ticket.getPayload()
+        const email = payload['email']
+        const user = await User.findOne({ email })
         if (!user) {
-          const firstName = payload['given_name'];
-          const lastName = payload['family_name'];
-          const avatar = payload['picture'];
+          const firstName = payload['given_name']
+          const lastName = payload['family_name']
+          const avatar = payload['picture']
           const newUser = await new User({
             email,
             firstName,
             lastName,
             avatar,
             userType: 'google'
-          }).save();
+          }).save()
           return {
             user: newUser,
             token: createToken(newUser, '1hr')
-          };
+          }
         }
         return {
           user,
           token: createToken(user, '1hr')
-        };
+        }
       } catch (err) {
-        // console.log(err);
-        throw new Error('Invalid token');
+        // console.log(err)
+        throw new Error('Invalid token')
       }
     },
     updateProfile(_, { email, firstName, lastName, phone }, { User, req }) {
-      const userId = getUserId(req);
+      const userId = getUserId(req)
       const user = User.findOneAndUpdate(
         { _id: userId },
         { email, firstName, lastName, phone },
         { new: true }
-      );
-      return user;
+      )
+      return user
     },
     async createReview(_, {text,cleanliness,accurracy, location, checkIn,office,user}, {User, Office, Review, req}){
       const userId = getUserId(req)
@@ -205,7 +209,7 @@ const guestResolver = {
       return result
     },
     async createBooking(_, { office, bookedSchedules, payment }, { Booking, req }) {
-      const userId = getUserId(req);
+      const userId = getUserId(req)
       const newBooking = await new Booking({
         bookee: userId,
         office,
