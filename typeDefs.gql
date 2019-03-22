@@ -278,13 +278,11 @@ type Mutation {
   ): Booking!
   createBookedSchedule(
     office: ID!
-    date: String!
-    slots: [Int!]!
+    schedule: [ScheduleInput!]!
   ): BookedSchedule!
   createAvailableSchedule(
     office: ID!
-    date: String!
-    slots: [Int!]!
+    schedule: [ScheduleInput!]!
   ): AvailableSchedule!
   createPayment(
     serviceFee: Float!
@@ -309,7 +307,10 @@ type Mutation {
     country: String!
   ): CreditCardInformation!
 }
-
+input ScheduleInput {
+    date: String!
+    slots: [Int!]!
+}
 input LocationInput {
   lat: Float
   lng: Float
