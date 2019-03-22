@@ -1,7 +1,7 @@
 const mongoose = require('mongoose')
 const BookedScheduleSchema = new mongoose.Schema({
     office: {
-        type: [mongoose.Schema.Types.ObjectId],
+        type: mongoose.Schema.Types.ObjectId,
         ref: 'Office'
     },
     date: {

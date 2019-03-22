@@ -34,7 +34,15 @@ const guestResolver = {
     async searchOffice(_, { searchTerm, area, category }, { Office, Location }) {
 
       if(!searchTerm && !area){
-        throw new Error('Enter at least one field!');
+        return await Office.find({}).populate([{
+          path: 'pricing'
+        },{
+          path: 'location'
+        },{
+          path: 'officeRules'
+        }, {
+          path: 'reviews'
+        }]).limit(4);
       }
       const condition = {};
       // titile

@@ -21,7 +21,6 @@ require('dotenv').config({path: 'variables.env'})
 // const resolvers = require('./resolvers')
 const path = require('path')
 const fs = require('fs')
-const jwt = require('jsonwebtoken')
 const filePath = path.join(__dirname, 'typeDefs.gql')
 const typeDefs = fs.readFileSync(filePath, 'utf-8')
 // Parse ObjectId

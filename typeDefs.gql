@@ -214,7 +214,7 @@ type Query {
   me: User!
   getCurrentUser: User
   searchLocation(address: String!, lat: Int!, lng: Int!): [Location!]
-  searchOffice(searchTerm: String, area: AreaInput, category: String): [Office!]
+  searchOffice(searchTerm: String, area: AreaInput, category: String!): [Office!]
   getOffices: [Office!] 
   getOffice(id: String!): Office!
   searchOfficeByFilter(id: [ID!]!, minSize: Int, maxSize: Int, minNumSeats: Int, maxNumSeats: Int, minPrice: Int, maxPice: Int, amenities: [String!]): [Office!]
@@ -278,11 +278,13 @@ type Mutation {
   ): Booking!
   createBookedSchedule(
     office: ID!
-    schedule: [ScheduleInput!]!
+    date: String!
+    slots: [Int!]!
   ): BookedSchedule!
   createAvailableSchedule(
     office: ID!
-    schedule: [ScheduleInput!]!
+    date: String!
+    slots: [Int!]!
   ): AvailableSchedule!
   createPayment(
     serviceFee: Float!
