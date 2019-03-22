@@ -114,13 +114,13 @@ const guestResolver = {
           date: element.date
         })
         // delete slot in AvailableSchedule
-        console.log("slots are needed to delete: "+bookedSlots.slots)
-        console.log("slots before: "+element.slots)
+        console.log("slots are booked: "+bookedSlots.slots)
+        console.log("slots are availabled before: "+element.slots)
         for(element2 of bookedSlots.slots){
           if(element.slots.indexOf(element2)>=0)
             element.slots.splice(element.slots.indexOf(element2), 1)
         }
-        console.log("slots after: "+element.slots)
+        console.log("slots are availabled after: "+element.slots)
       }
 
       console.log("AvailableSchedule result: "+currentAvailableSchedule)
