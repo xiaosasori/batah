@@ -113,7 +113,7 @@ const guestResolver = {
           office,
           date: element.date
         })
-        // delete slot in AvailableSchedule
+        // delete slots are booked
         console.log("slots are booked: "+bookedSlots.slots)
         console.log("slots are availabled before: "+element.slots)
         for(element2 of bookedSlots.slots){
