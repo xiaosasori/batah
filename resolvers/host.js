@@ -59,14 +59,13 @@ const hostResolver = {
 
       const savedOffice = await new Office(newOffice).save();
       // console.log(args.schedule)
-      await AvailableSchedule({schedule: args.schedule,office: savedOffice._id}).save()
+      args.schedule.forEach(async el => await AvailableSchedule({...el,office: savedOffice._id}).save())
 
       await User.findOneAndUpdate(
         { _id: userId },
         { $push: { offices: { $each: [savedOffice._id], $position: 0 } } }
       );
       return savedOffice;
-      // return newOffice
     },
     async createAvailableSchedule(_, { office, date, slots }, { AvailableSchedule }) {
       const newAvailableSchedule = await new AvailableSchedule({
