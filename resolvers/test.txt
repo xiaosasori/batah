@@ -7,6 +7,10 @@ query{
     id
     title
   }
+  getAvailableSchedule(office: "5c90af9073c36f0e0ca0f1f1", startDate: "2018/03/01", endDate: "2018/03/31"){
+    date
+    slots
+  }
 }	
 mutation {
   createBookedSchedule(office: "5c90af9073c36f0e0ca0f1f1", date: "2018/03/30", slots: [1,2,5]){
