@@ -247,6 +247,7 @@ type Mutation {
   ): User!
   createList(
     city: String!
+    size: Int!,
     title: String!
     category: String!
     address: String!
