@@ -218,7 +218,7 @@ type Query {
   getOffices: [Office!] 
   getOffice(id: String!): Office!
   searchOfficeByFilter(id: [ID!]!, minSize: Int, maxSize: Int, minNumSeats: Int, maxNumSeats: Int, minPrice: Int, maxPice: Int, amenities: [String!]): [Office!]
-  getAvailableSchedule(office: ID!, startDate: String!, endDate: String!): [AvailableSchedule!]
+  getAvailableSchedule(office: ID!, startDate: String, endDate: String): [AvailableSchedule!]
 }
 
 input AreaInput{

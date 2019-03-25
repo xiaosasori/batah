@@ -29,7 +29,8 @@ const PlaceSchema = new mongoose.Schema({
         required: true
     },
     phone: {
-        type: String
+        type: String,
+        required: true
     },
     website: {
         type: String

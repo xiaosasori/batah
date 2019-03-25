@@ -42,7 +42,7 @@ const guestResolver = {
           path: 'officeRules'
         }, {
           path: 'reviews'
-        }]).limit(4)
+        }])
       }
       const condition = {}
       // titile
@@ -102,7 +102,7 @@ const guestResolver = {
       console.log("Function: getAvailableSchedule");
       let currentAvailableSchedule = await AvailableSchedule.find({
         office,
-        date: {$gte: new Date(startDate),  $lte: new Date(endDate) }
+        // date: {$gte: new Date(startDate),  $lte: new Date(endDate) }
       })
 
       // delete slots in each day
@@ -113,14 +113,16 @@ const guestResolver = {
           office,
           date: element.date
         })
-        // delete slots are booked
-        console.log("slots are booked: "+bookedSlots.slots)
-        console.log("slots are availabled before: "+element.slots)
-        for(element2 of bookedSlots.slots){
-          if(element.slots.indexOf(element2)>=0)
-            element.slots.splice(element.slots.indexOf(element2), 1)
+        if(bookedSlots){
+          // delete slots are booked
+          console.log("slots are booked: "+bookedSlots.slots)
+          console.log("slots are availabled before: "+element.slots)
+          for(element2 of bookedSlots.slots){
+            if(element.slots.indexOf(element2)>=0)
+              element.slots.splice(element.slots.indexOf(element2), 1)
+          }
+          console.log("slots are availabled after: "+element.slots)
         }
-        console.log("slots are availabled after: "+element.slots)
       }
 
       console.log("AvailableSchedule result: "+currentAvailableSchedule)

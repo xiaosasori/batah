@@ -10,9 +10,9 @@ const BookingSchema = new mongoose.Schema({
         ref: 'User',
         required: true
     },
-    place: {
+    office: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'Place',
+        ref: 'Office',
         required: true
     },
     bookedSchedules: {

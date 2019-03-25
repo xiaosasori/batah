@@ -57,6 +57,3 @@ const getDaysLeftInMonth = () => {
 };
 
 module.exports = { createToken, getUserId, hashPassword, getDaysLeftInMonth };
-let cate = ['teaching', 'meeting'];
-let off = 'teaching'
-console.log(cate.includes(off))
