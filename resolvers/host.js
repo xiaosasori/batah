@@ -74,6 +74,15 @@ const hostResolver = {
         slots
       }).save()
       return newAvailableSchedule
+    },
+    async deleteAvailableSchedule(_, { office, startDate, endDate }, { AvailableSchedule }) {
+      AvailableSchedule.deleteMany({
+        office,
+        date: {$gte: new Date(startDate),  $lte: new Date(endDate) }
+      }, function (err) {
+        if (err) return false
+      })
+      return true
     }
   }
 };

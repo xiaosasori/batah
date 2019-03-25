@@ -287,6 +287,11 @@ type Mutation {
     date: String!
     slots: [Int!]!
   ): AvailableSchedule!
+  deleteAvailableSchedule(
+    office: ID!
+    startDate: String!
+    endDate: String!
+  ): Boolean!
   createPayment(
     serviceFee: Float!
     officePrice: Float!
