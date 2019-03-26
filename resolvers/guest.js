@@ -128,6 +128,15 @@ const guestResolver = {
 
       console.log("AvailableSchedule result: "+currentAvailableSchedule)
       return currentAvailableSchedule
+    },
+    /* get all booking of a guest */
+    async getBooking(_, {},{ BookedSchedule, req }){
+      const userId = getUserId(req)
+      console.log("Function: getBooking");
+      const currentBooking = await BookedSchedule.find({
+        bookee: userId,
+      }).populate('bookedSchedules')
+      return currentBooking;
     }
   },
   Mutation: {
