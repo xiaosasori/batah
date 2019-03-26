@@ -14,6 +14,38 @@ const hostResolver = {
         date: {$gte: new Date(startDate),  $lte: new Date(endDate) }
       })
       return currentBookedSchedule;
+    },
+    /* host can view history of guest booking */
+    async getBookingByHost(_, {},{ Booking, Office, req }){
+      console.log("Function: getBookingByHost");
+
+      // get offices by this host
+      const hostId = getUserId(req)
+      const ownOffice = await Office.find({
+        host: hostId,
+      })
+
+      // get bookings by above office
+      const currentBooking = await Booking.find({
+        office: {$in: ownOffice}
+      }).populate(['bookedSchedules bookee'])
+      return currentBooking;
+    },
+    /* host can view history of guest booking */
+    async getTotalPrice(_, {office},{ Booking, Office, req }){
+      console.log("Function: getTotalPrice");
+
+      // get offices by this host
+      const hostId = getUserId(req)
+      const condition = {host: hostId}
+      if(office) condition._id = office
+      const ownOffice = await Office.find(condition)
+
+      // get bookings by above office
+      const currentBooking = await Booking.find({
+        office: {$in: ownOffice}
+      }).populate(['bookedSchedules bookee'])
+      return currentBooking;
     }
   },
   Mutation: {

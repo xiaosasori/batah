@@ -129,11 +129,11 @@ const guestResolver = {
       console.log("AvailableSchedule result: "+currentAvailableSchedule)
       return currentAvailableSchedule
     },
-    /* get all booking of a guest */
-    async getBooking(_, {},{ BookedSchedule, req }){
+    /* get all booking of a guest (logined) */
+    async getBookingByGuest(_, {},{ Booking, req }){
       const userId = getUserId(req)
-      console.log("Function: getBooking");
-      const currentBooking = await BookedSchedule.find({
+      console.log("Function: getBookingByGuest");
+      const currentBooking = await Booking.find({
         bookee: userId,
       }).populate('bookedSchedules')
       return currentBooking;
