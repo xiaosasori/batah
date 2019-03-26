@@ -97,6 +97,7 @@ const guestResolver = {
       }
       return Office.find(condition)
     },
+    /* guest can book in AvailablseSchedule */
     async getAvailableSchedule(_, {office, startDate, endDate},{ AvailableSchedule, BookedSchedule }){
       // get current AvailableSchedule
       console.log("Function: getAvailableSchedule");

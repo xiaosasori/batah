@@ -5,6 +5,15 @@ const hostResolver = {
       const userId = getUserId(req);
       const res = await Office.find({host: userId}).populate('reviews')
       return res
+    },
+    /* host can not edit booked schedule */
+    async getBookedSchedule(_, {office, startDate, endDate},{ BookedSchedule }){
+      console.log("Function: getBookedSchedule");
+      const currentBookedSchedule = await BookedSchedule.find({
+        office,
+        date: {$gte: new Date(startDate),  $lte: new Date(endDate) }
+      })
+      return currentBookedSchedule;
     }
   },
   Mutation: {
