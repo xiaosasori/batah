@@ -1,4 +1,7 @@
-const {getUserId, getDaysLeftInMonth} = require('../utils');
+const {
+  getUserId
+} = require('../utils')
+
 const hostResolver = {
   Query: {
     async getOffices(_, args, {User, Office, req}){
@@ -31,7 +34,7 @@ const hostResolver = {
       }).populate(['bookedSchedules bookee'])
       return currentBooking;
     },
-    /* host can view history of guest booking */
+    /* host can view total price if input office (each office earn) or not input (total price) */
     async getTotalPrice(_, {office},{ Booking, Office, req }){
       console.log("Function: getTotalPrice");
 
@@ -44,8 +47,16 @@ const hostResolver = {
       // get bookings by above office
       const currentBooking = await Booking.find({
         office: {$in: ownOffice}
-      }).populate(['bookedSchedules bookee'])
-      return currentBooking;
+      }).populate('payment', 'totalPrice')
+      console.log(currentBooking)
+      
+      // sum payments of bookings
+      let sum = 0.0;
+      for(element of currentBooking){
+        sum+=element.payment.totalPrice
+      }
+      console.log("Total price: " + sum)
+      return {price: sum};
     }
   },
   Mutation: {

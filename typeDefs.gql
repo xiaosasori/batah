@@ -42,6 +42,7 @@ type Office {
   pictures: [String!]!
   popularity: Int!
   tags: [String!]!
+  status: String 
 }
 
 type Pricing {
@@ -222,7 +223,11 @@ type Query {
   getBookedSchedule(office: ID!, startDate: String, endDate: String): [BookedSchedule!]
   getBookingByGuest: [Booking!]
   getBookingByHost: [Booking!]
-  getTotalPrice(office: ID): Int
+  getTotalPrice(office: ID): Price!
+}
+
+type Price{
+  price: Float
 }
 
 input AreaInput{
