@@ -43,6 +43,7 @@ type Office {
   pictures: [String!]!
   popularity: Int!
   tags: [String!]!
+  status: String 
 }
 
 type Pricing {
@@ -220,6 +221,14 @@ type Query {
   getOffice(id: String!): Office!
   searchOfficeByFilter(id: [ID!]!, minSize: Int, maxSize: Int, minNumSeats: Int, maxNumSeats: Int, minPrice: Int, maxPice: Int, amenities: [String!]): [Office!]
   getAvailableSchedule(office: ID!, startDate: String, endDate: String): [AvailableSchedule!]
+  getBookedSchedule(office: ID!, startDate: String, endDate: String): [BookedSchedule!]
+  getBookingByGuest: [Booking!]
+  getBookingByHost: [Booking!]
+  getTotalPrice(office: ID): Price!
+}
+
+type Price{
+  price: Float
 }
 
 input AreaInput{
@@ -288,6 +297,11 @@ type Mutation {
     date: String!
     slots: [Int!]!
   ): AvailableSchedule!
+  deleteAvailableSchedule(
+    office: ID!
+    startDate: String!
+    endDate: String!
+  ): Boolean!
   createPayment(
     serviceFee: Float!
     officePrice: Float!

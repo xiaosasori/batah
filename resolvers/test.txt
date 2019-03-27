@@ -1,3 +1,7 @@
+{
+  "authorization":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI1Yzk4OTBiMmQ2M2NlZTM0NDU4YjA5ZjYiLCJlbWFpbCI6ImhpZXBuYjk3QGdtYWlsLmNvbSIsImlhdCI6MTU1MzU3MTA5MSwiZXhwIjoxNTUzNTc0NjkxfQ.USzW9VLkjp67NBLQzruoE4poRLfd5USZhC8duAL7dGQ"
+}
+
 query{
   searchOffice(searchTerm: "sfs", area: {ga:{from:0,to:1000},ma:{from:0,to:1000}}){
     id
@@ -11,13 +15,22 @@ query{
     date
     slots
   }
+  getBooking{
+    id
+    bookedSchedules{
+      id
+      office
+      date
+      slots
+    }
+  }
 }	
 mutation {
-  createBookedSchedule(office: "5c90af9073c36f0e0ca0f1f1", date: "2018/03/30", slots: [1,2,5]){
+  createAvailableSchedule(office: "5c90af9073c36f0e0ca0f1f1", date: "2018/04/1", slots: [1,3,4,5]){
     date
     slots
   }
-  createAvailableSchedule(office: "5c90af9073c36f0e0ca0f1f1", date: "2018/03/30", slots: [1,2,5]){
+  createBookedSchedule(office: "5c90af9073c36f0e0ca0f1f1", date: "2018/04/1", slots: [1,3]){
     date
     slots
   }
@@ -35,5 +48,16 @@ mutation {
   createPayment(serviceFee: 10, officePrice: 100, numHours: 4, paymentMethod: "5c9358fef3db480b60662304"){
     id
     totalPrice
+  }
+  deleteAvailableSchedule(office: "5c90af9073c36f0e0ca0f1f1", startDate: "2018/03/01", endDate: "2018/04/31"){
+    
+  }
+  getBookedSchedule(office: "5c90af9073c36f0e0ca0f1f1", startDate: "2018/03/01", endDate: "2018/04/31"){
+    date
+    slots
+  }
+  createBooking(office:"5c90af9073c36f0e0ca0f1f1", bookedSchedules: ["5c94568169c5e4121489bcb3"], payment: "5c9359ecd813f75158bee951"){
+    id
+    createdAt
   }
 }

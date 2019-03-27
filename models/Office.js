@@ -96,5 +96,8 @@ const PlaceSchema = new mongoose.Schema({
         type:[mongoose.Schema.Types.ObjectId],
         ref: 'AvailableSchedule'
     },
+    status: {
+        type: String //pending approve deactive
+    }
 })
 module.exports = mongoose.model('Office', PlaceSchema)

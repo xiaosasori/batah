@@ -97,6 +97,7 @@ const guestResolver = {
       }
       return Office.find(condition)
     },
+    /* guest can book in AvailablseSchedule */
     async getAvailableSchedule(_, {office, startDate, endDate},{ AvailableSchedule, BookedSchedule }){
       // get current AvailableSchedule
       console.log("Function: getAvailableSchedule");
@@ -129,6 +130,15 @@ const guestResolver = {
 
       // console.log("AvailableSchedule result: "+currentAvailableSchedule)
       return currentAvailableSchedule
+    },
+    /* get all booking of a guest (logined) */
+    async getBookingByGuest(_, {},{ Booking, req }){
+      const userId = getUserId(req)
+      console.log("Function: getBookingByGuest");
+      const currentBooking = await Booking.find({
+        bookee: userId,
+      }).populate('bookedSchedules')
+      return currentBooking;
     }
   },
   Mutation: {

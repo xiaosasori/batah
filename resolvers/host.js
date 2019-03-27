@@ -1,10 +1,62 @@
-const {getUserId, getDaysLeftInMonth} = require('../utils');
+const {
+  getUserId
+} = require('../utils')
+
 const hostResolver = {
   Query: {
     async getOffices(_, args, {User, Office, req}){
       const userId = getUserId(req);
       const res = await Office.find({host: userId}).populate('reviews')
       return res
+    },
+    /* host can not edit booked schedule */
+    async getBookedSchedule(_, {office, startDate, endDate},{ BookedSchedule }){
+      console.log("Function: getBookedSchedule");
+      const currentBookedSchedule = await BookedSchedule.find({
+        office,
+        date: {$gte: new Date(startDate),  $lte: new Date(endDate) }
+      })
+      return currentBookedSchedule;
+    },
+    /* host can view history of guest booking */
+    async getBookingByHost(_, {},{ Booking, Office, req }){
+      console.log("Function: getBookingByHost");
+
+      // get offices by this host
+      const hostId = getUserId(req)
+      const ownOffice = await Office.find({
+        host: hostId,
+      })
+
+      // get bookings by above office
+      const currentBooking = await Booking.find({
+        office: {$in: ownOffice}
+      }).populate(['bookedSchedules bookee'])
+      return currentBooking;
+    },
+    /* host can view total price if input office (each office earn) or not input (total price) */
+    async getTotalPrice(_, {office},{ Booking, Office, req }){
+      console.log("Function: getTotalPrice");
+
+      // get offices by this host
+      const hostId = getUserId(req)
+      const condition = {host: hostId}
+      if(office) condition._id = office
+      const ownOffice = await Office.find(condition)
+
+      // get bookings by above office
+      const currentBooking = await Booking.find({
+        office: {$in: ownOffice}
+      }).populate('payment', 'totalPrice')
+      console.log(currentBooking)
+      
+      // sum payments of bookings
+      let sum = 0.0;
+      for(element of currentBooking){
+        sum+=element.payment.totalPrice
+      }
+      console.log("Total price: " + sum)
+      return {price: sum};
     }
   },
   Mutation: {
@@ -74,6 +126,15 @@ const hostResolver = {
         slots
       }).save()
       return newAvailableSchedule
+    },
+    async deleteAvailableSchedule(_, { office, startDate, endDate }, { AvailableSchedule }) {
+      AvailableSchedule.deleteMany({
+        office,
+        date: {$gte: new Date(startDate),  $lte: new Date(endDate) }
+      }, function (err) {
+        if (err) return false
+      })
+      return true
     }
   }
 };
