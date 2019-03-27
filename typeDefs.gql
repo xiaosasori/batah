@@ -324,6 +324,7 @@ type Mutation {
     fullName: String!
     country: String!
   ): CreditCardInformation!
+  createMessage(to: ID! content: String!): Message!
 }
 input BookedScheduleInput {
   office: ID!

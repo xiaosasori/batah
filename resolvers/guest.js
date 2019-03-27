@@ -52,7 +52,7 @@ const guestResolver = {
 
       // area
       if(area){
-        console.log('area', area)
+        // console.log('area', area)
         const foundLocation = await Location.find({
           lat: { $gte: area.ma.from, $lte: area.ma.to },
           lng: { $gte: area.ga.from, $lte: area.ga.to }
@@ -111,8 +111,11 @@ const guestResolver = {
         // get booked slots
         // console.log("Day: "+element.date);
         let formatDate = new Date(element.date)
+        formatDate.setHours(0,0,0,0)
+        let nextDate = new Date(formatDate.getFullYear(), formatDate.getMonth(), formatDate.getDate()+1)
         const bookedSlots = await BookedSchedule.findOne({
-          office
+          office,
+          date: {"$gte": formatDate, "$lt": nextDate}
         })
         if(bookedSlots){
         console.log(new Date(element.date))
@@ -125,6 +128,10 @@ const guestResolver = {
               element.slots.splice(element.slots.indexOf(element2), 1)
           }
           console.log("slots are availabled after: "+element.slots)
+          if(element.slots.length==0) {
+            // console.log(currentAvailableSchedule.indexOf(element))
+            currentAvailableSchedule.splice(currentAvailableSchedule.indexOf(element),1)
+          }
         }
       }
 
@@ -288,8 +295,15 @@ const guestResolver = {
         country
       }).save()
       return newCreditCardInformation
+    },
+    async createMessage(_, { to, content}, {req, User, Message}){
+      const userId = getUserId(req)
+      try{
+        await User.findById(to)
+      }catch(err){ throw new Error('User not exist')}
+      const newMessage = await new Message({from: userId, to, content}).save()
+      return newMessage
     }
-
   }
 }
 
