@@ -41,6 +41,9 @@ const UserSchema = new mongoose.Schema({
     offices: [{
         type: [mongoose.Schema.Types.ObjectId],
         ref: 'Office'
+    }],
+    identity: [{
+        type: String
     }]
 })
 

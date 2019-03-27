@@ -16,6 +16,7 @@ type User {
   notifications: [Notification!]!
   avatar: String!
   userType: String
+  identity: [String!]
 }
 
 type Office {
@@ -244,6 +245,8 @@ type Mutation {
     lastName: String!
     email: String!
     phone: String
+    avatar: String
+    identity: [String!]
   ): User!
   createList(
     city: String!
@@ -273,9 +276,7 @@ type Mutation {
     office: String!
     user: String!): Review!
   createBooking(
-    office: ID!
-    bookedSchedules: [ID!]!
-    payment: ID
+    bookedSchedules: BookedScheduleInput!
   ): Booking!
   createBookedSchedule(
     office: ID!
@@ -309,6 +310,11 @@ type Mutation {
     fullName: String!
     country: String!
   ): CreditCardInformation!
+}
+input BookedScheduleInput {
+  office: ID!
+    date: String!
+    slots: [Int!]!
 }
 input ScheduleInput {
     date: String!

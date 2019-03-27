@@ -16,7 +16,7 @@ const BookingSchema = new mongoose.Schema({
         required: true
     },
     bookedSchedules: {
-        type: [mongoose.Schema.Types.ObjectId],
+        type: mongoose.Schema.Types.ObjectId,
         ref: 'BookedSchedule',
         required: true
     },

@@ -57,3 +57,9 @@ const getDaysLeftInMonth = () => {
 };
 
 module.exports = { createToken, getUserId, hashPassword, getDaysLeftInMonth };
+// let a = new Date()
+// let b = new Date(a.getFullYear(), a.getMonth(), a.getDate()+1)
+// // let b = new Date(new Date(a.getTime()+ (24 * 60 * 60 * 1000)).setHours(0,0,0,0))
+// console.log(a)
+// console.log(b.getDate())
+// console.log(b.getHours())

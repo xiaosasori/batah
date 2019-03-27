@@ -108,13 +108,15 @@ const guestResolver = {
       // delete slots in each day
       for(element of currentAvailableSchedule){
         // get booked slots
-        console.log("Day: "+element.date);
+        // console.log("Day: "+element.date);
+        let formatDate = new Date(element.date)
         const bookedSlots = await BookedSchedule.findOne({
-          office,
-          date: element.date
+          office
         })
         if(bookedSlots){
+        console.log(new Date(element.date))
           // delete slots are booked
+          console.log("date booked: "+bookedSlots.date)
           console.log("slots are booked: "+bookedSlots.slots)
           console.log("slots are availabled before: "+element.slots)
           for(element2 of bookedSlots.slots){
@@ -125,7 +127,7 @@ const guestResolver = {
         }
       }
 
-      console.log("AvailableSchedule result: "+currentAvailableSchedule)
+      // console.log("AvailableSchedule result: "+currentAvailableSchedule)
       return currentAvailableSchedule
     }
   },
@@ -191,11 +193,11 @@ const guestResolver = {
         throw new Error('Invalid token')
       }
     },
-    updateProfile(_, { email, firstName, lastName, phone }, { User, req }) {
+    updateProfile(_, { email, firstName, lastName, phone, identity, avatar }, { User, req }) {
       const userId = getUserId(req)
       const user = User.findOneAndUpdate(
         { _id: userId },
-        { email, firstName, lastName, phone },
+        { email, firstName, lastName, phone, identity, avatar },
         { new: true }
       )
       return user
@@ -210,13 +212,28 @@ const guestResolver = {
       // user can only review onece per order
       return result
     },
-    async createBooking(_, { office, bookedSchedules, payment }, { Booking, req }) {
+    async createBooking(_, { bookedSchedules }, {BookedSchedule, Office,Booking, Payment, req }) {
       const userId = getUserId(req)
+      let officeId = bookedSchedules.office
+      let office = await Office.findById(officeId).populate('pricing')
+      console.log('office', office.pricing.basePrice)
+      let totalPrice = office.pricing.basePrice * bookedSchedules.slots.length
+      console.log('totalPrice', totalPrice)
+      let serviceFee = totalPrice * 0.1
+      console.log('serviceFee', serviceFee)
+      let paymentMethod = 'paypal'
+      const payment = await new Payment({serviceFee, officePrice: office.pricing.basePrice,totalPrice,paymentMethod}).save()
+      console.log('id',payment._id)
+      const newBookedSchedule = await new BookedSchedule({
+        office: officeId,
+        date : new Date(bookedSchedules.date),
+        slots: bookedSchedules.slots
+      }).save()
       const newBooking = await new Booking({
         bookee: userId,
-        office,
-        bookedSchedules,
-        payment
+        office:officeId,
+        bookedSchedules: newBookedSchedule._id,
+        payment: payment._id
       }).save()
       return newBooking
     },

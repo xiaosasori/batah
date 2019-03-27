@@ -16,6 +16,7 @@
     "nodemon": "^1.18.10"
   },
   "dependencies": {
+    "@paypal/checkout-server-sdk": "^1.0.0",
     "apollo-boost": "^0.1.27",
     "apollo-server": "^2.4.0",
     "bcryptjs": "^2.4.3",
