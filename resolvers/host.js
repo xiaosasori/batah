@@ -1,5 +1,6 @@
 const {
-  getUserId
+  getUserId,
+  formatSearch
 } = require('../utils')
 
 const hostResolver = {

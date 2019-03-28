@@ -1,7 +1,8 @@
 const {
   hashPassword,
   createToken,
-  getUserId
+  getUserId,
+  formatSearch
 } = require('../utils')
 const bcryptjs = require('bcryptjs')
 const { OAuth2Client } = require('google-auth-library')
@@ -32,7 +33,7 @@ const guestResolver = {
       return office
     },
     async searchOffice(_, { searchTerm, area, category }, { Office, Location }) {
-
+      console.log("Function: searchOffice")
       if(!searchTerm && !area){
         return await Office.find({}).populate([{
           path: 'pricing'
@@ -46,8 +47,10 @@ const guestResolver = {
       }
       const condition = {}
       // titile
+      searchTerm = formatSearch(searchTerm)
+      console.log("searchTerm: " + searchTerm)
       if(searchTerm){
-        condition.title = { "$regex": searchTerm, "$options": "i" }
+        condition.searchTitle = { "$regex": searchTerm, "$options": "i" }
       }
 
       // area
@@ -337,5 +340,4 @@ const guestResolver = {
     }
   }
 }
-
 module.exports =  guestResolver
