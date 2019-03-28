@@ -132,8 +132,8 @@ type Booking {
   createdAt: String!
   bookee: User!
   office: Office!
-  bookedSchedules: [BookedSchedule!]!
-  payment: Payment
+  bookedSchedules: BookedSchedule!
+  payment: Payment!
 }
 
 type Payment {
@@ -332,6 +332,7 @@ type Mutation {
     country: String!
   ): CreditCardInformation!
   createMessage(to: ID! content: String!): Message!
+  updateMessage(id: ID!): Message!
 }
 input BookedScheduleInput {
   office: ID!

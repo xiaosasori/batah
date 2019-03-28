@@ -139,12 +139,26 @@ const guestResolver = {
       return currentAvailableSchedule
     },
     /* get all booking of a guest (logined) */
-    async getBookingByGuest(_, {},{ Booking, req }){
-      const userId = getUserId(req)
+    async getBookingByGuest(_, arg,{ Booking, req }){
       console.log("Function: getBookingByGuest");
+      const userId = getUserId(req)
       const currentBooking = await Booking.find({
         bookee: userId,
-      }).populate('bookedSchedules')
+      }).populate([{
+        path: 'payment',
+        select: 'totalPrice'
+      }, {
+        path: 'office',
+        select: 'id title pictures address',
+        populate: {
+          path: 'host',
+          select: 'firstName lastName email phone'
+        }
+      }, {
+        path: 'bookedSchedules',
+        select: 'date slots'
+      }])
+      console.log(currentBooking)
       return currentBooking;
     },
     async getMessages(_,{},{Conversation,Message, req}){
@@ -156,10 +170,9 @@ const guestResolver = {
           path: 'from to',
           select: 'firstName lastName avatar'
         }
-      }
-      ])
+      }])
       return conversations
-    }
+    },
   },
   Mutation: {
     async signup(_, { email, password, firstName, lastName }, { User }) {
@@ -319,6 +332,10 @@ const guestResolver = {
       if(convo) await Conversation.updateOne({_id: convo._id},{$push: {messages: {$each: [newMessage._id]}}})
       else await new Conversation({participants: [userId, to], messages:[newMessage._id]}).save()
       return newMessage
+    },
+    async updateMessage(_, { id}, {req, Message}){
+      const userId = getUserId(req)
+      return await Message.findOneAndUpdate({_id:id},{readAt: new Date()}, { new: true })
     }
   }
 }
