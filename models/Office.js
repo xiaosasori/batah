@@ -4,6 +4,10 @@ const PlaceSchema = new mongoose.Schema({
         type: String,
         required: true
     },
+    searchTitle: {
+        type: String,
+        required: true
+    },
     category: {
         type: String,
         required: true

@@ -1,5 +1,6 @@
 const {
-  getUserId
+  getUserId,
+  formatSearch
 } = require('../utils')
 
 const hostResolver = {
@@ -136,6 +137,14 @@ const hostResolver = {
         if (err) return false
       })
       return true
+    },
+    async createViews(_, { office }, {Views}){
+      const newViews = await new Views({
+        office,
+        numView: 0,
+        numBooking: 0
+      }).save()
+      return newViews
     }
   }
 };

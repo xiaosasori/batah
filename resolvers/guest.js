@@ -1,7 +1,8 @@
 const {
   hashPassword,
   createToken,
-  getUserId
+  getUserId,
+  formatSearch
 } = require('../utils')
 const bcryptjs = require('bcryptjs')
 const { OAuth2Client } = require('google-auth-library')
@@ -32,7 +33,7 @@ const guestResolver = {
       return office
     },
     async searchOffice(_, { searchTerm, area, category }, { Office, Location }) {
-
+      console.log("Function: searchOffice")
       if(!searchTerm && !area){
         return await Office.find({}).populate([{
           path: 'pricing'
@@ -45,9 +46,12 @@ const guestResolver = {
         }])
       }
       const condition = {}
-      // titile
+
+      // searchTitle
+      searchTerm = formatSearch(searchTerm)
+      console.log("searchTerm: " + searchTerm)
       if(searchTerm){
-        condition.title = { "$regex": searchTerm, "$options": "i" }
+        condition.searchTitle = { "$regex": searchTerm, "$options": "i" }
       }
 
       // area
@@ -96,6 +100,21 @@ const guestResolver = {
         condition.amenities = { $all: amenities }
       }
       return Office.find(condition)
+    },
+    // top booking offices
+    async topBookingOffice(_, { num }, { Office, Booking }) {
+      const condition = {}
+      
+      return await Office.find(condition)
+    },
+    // find num office contain address
+    async findNumOffice(_, { sContain }, { Office }) { // eg: sContain = Hà Nội
+      console.log("Function: findNumOffice")
+      const condition = {}
+      condition.address = { "$regex": sContain, "$options": "i" }
+      const currentOffice = await Office.find(condition)
+      console.log(currentOffice.length)
+      return {num: currentOffice.length}
     },
     /* guest can book in AvailablseSchedule */
     async getAvailableSchedule(_, {office, startDate, endDate},{ AvailableSchedule, BookedSchedule }){
@@ -278,6 +297,10 @@ const guestResolver = {
         bookedSchedules: newBookedSchedule._id,
         payment: payment._id
       }).save()
+
+      // add View Booking
+      addViewsBooking(officeId)
+
       return newBooking
     },
     async createBookedSchedule(_, { office, date, slots }, { BookedSchedule }) {
@@ -336,8 +359,13 @@ const guestResolver = {
     async updateMessage(_, { id}, {req, Message}){
       const userId = getUserId(req)
       return await Message.findOneAndUpdate({_id:id},{readAt: new Date()}, { new: true })
+    },
+    async addViewsBooking(_, {office}, {Views}){
+      return Views.findOneAndUpdate({office}, {$inc: {numBooking: 1}},{new: true});
+    },
+    async addViewsView(_, {office}, {Views}){
+      return Views.findOneAndUpdate({office}, {$inc: {numView: 1}},{new: true});
     }
   }
 }
-
 module.exports =  guestResolver

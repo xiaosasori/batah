@@ -15,7 +15,11 @@ query{
     date
     slots
   }
-  getBooking{
+  getBookedSchedule(office: "5c90af9073c36f0e0ca0f1f1", startDate: "2018/03/01", endDate: "2018/04/31"){
+    date
+    slots
+  }
+  getBookingByGuest{
     id
     bookedSchedules{
       id
@@ -23,6 +27,18 @@ query{
       date
       slots
     }
+  }
+  getBookingByHost{
+    id
+    createdAt
+    bookedSchedules{
+      id
+      date
+      slots
+    }
+  }
+  getTotalPrice(office: "5c93b915fc76560f480b4266"){
+    price
   }
 }	
 mutation {
@@ -51,10 +67,6 @@ mutation {
   }
   deleteAvailableSchedule(office: "5c90af9073c36f0e0ca0f1f1", startDate: "2018/03/01", endDate: "2018/04/31"){
     
-  }
-  getBookedSchedule(office: "5c90af9073c36f0e0ca0f1f1", startDate: "2018/03/01", endDate: "2018/04/31"){
-    date
-    slots
   }
   createBooking(office:"5c90af9073c36f0e0ca0f1f1", bookedSchedules: ["5c94568169c5e4121489bcb3"], payment: "5c9359ecd813f75158bee951"){
     id

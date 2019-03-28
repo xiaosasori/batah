@@ -23,6 +23,7 @@ type User {
 type Office {
   id: ID!
   title: String!
+  searchTitle: String!
   address: String!
   category: String!
   shortDescription: String!
@@ -72,8 +73,9 @@ type OfficeRules {
 
 type Views {
   id: ID!
-  lastWeek: Int!
   office: Office!
+  numView: Int!
+  numBooking: Int!
 }
 
 type Location {
@@ -226,6 +228,8 @@ type Query {
   getOffices: [Office!] 
   getOffice(id: String!): Office!
   searchOfficeByFilter(id: [ID!]!, minSize: Int, maxSize: Int, minNumSeats: Int, maxNumSeats: Int, minPrice: Int, maxPice: Int, amenities: [String!]): [Office!]
+  topBookingOffice(num: Int!): Office!
+  findNumOffice(sContain: String!): Num!
   getAvailableSchedule(office: ID!, startDate: String, endDate: String): [AvailableSchedule!]
   getBookedSchedule(office: ID!, startDate: String, endDate: String): [BookedSchedule!]
   getBookingByGuest: [Booking!]
@@ -236,6 +240,10 @@ type Query {
 
 type Price{
   price: Float
+}
+
+type Num{
+  num: Int
 }
 
 input AreaInput{
@@ -332,7 +340,13 @@ type Mutation {
     country: String!
   ): CreditCardInformation!
   createMessage(to: ID! content: String!): Message!
+<<<<<<< HEAD
   updateMessage(id: ID!): Message!
+=======
+  createViews(office: ID!): Views!
+  addViewsBooking(office: ID!): Views!
+  addViewsView(office: ID!): Views!
+>>>>>>> 05064ebc608209fc3debbabe32bd3cfe4ecd8f5d
 }
 input BookedScheduleInput {
   office: ID!

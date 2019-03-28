@@ -1,13 +1,17 @@
 const mongoose = require('mongoose')
 const ViewsSchema = new mongoose.Schema({
-    lastWeek: {
+    office: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Office',
+        required: true
+    },
+    numView: {
         type: Number,
         required: true
     },
-    place: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Place',
+    numBooking: {
+        type: Number,
         required: true
-    },
+    }
 })
 module.exports = mongoose.model('Views', ViewsSchema)
