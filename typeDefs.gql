@@ -340,13 +340,10 @@ type Mutation {
     country: String!
   ): CreditCardInformation!
   createMessage(to: ID! content: String!): Message!
-<<<<<<< HEAD
   updateMessage(id: ID!): Message!
-=======
   createViews(office: ID!): Views!
   addViewsBooking(office: ID!): Views!
   addViewsView(office: ID!): Views!
->>>>>>> 05064ebc608209fc3debbabe32bd3cfe4ecd8f5d
 }
 input BookedScheduleInput {
   office: ID!
