@@ -23,6 +23,7 @@ type User {
 type Office {
   id: ID!
   title: String!
+  searchTitle: String!
   address: String!
   category: String!
   shortDescription: String!
