@@ -219,6 +219,8 @@ type Query {
   getOffices: [Office!] 
   getOffice(id: String!): Office!
   searchOfficeByFilter(id: [ID!]!, minSize: Int, maxSize: Int, minNumSeats: Int, maxNumSeats: Int, minPrice: Int, maxPice: Int, amenities: [String!]): [Office!]
+  topBookingOffice(num: Int!): Office!
+  findNumOffice(sContain: String!): Num!
   getAvailableSchedule(office: ID!, startDate: String, endDate: String): [AvailableSchedule!]
   getBookedSchedule(office: ID!, startDate: String, endDate: String): [BookedSchedule!]
   getBookingByGuest: [Booking!]
@@ -228,6 +230,10 @@ type Query {
 
 type Price{
   price: Float
+}
+
+type Num{
+  num: Int
 }
 
 input AreaInput{

@@ -97,6 +97,21 @@ const guestResolver = {
       }
       return Office.find(condition)
     },
+    // top booking offices
+    async topBookingOffice(_, { num }, { Office, Booking }) {
+      const condition = {}
+      
+      return await Office.find(condition)
+    },
+    // find num office contain address
+    async findNumOffice(_, { sContain }, { Office }) { // eg: sContain = Hà Nội
+      console.log("Function: findNumOffice")
+      const condition = {}
+      condition.address = { "$regex": sContain, "$options": "i" }
+      const currentOffice = await Office.find(condition)
+      console.log(currentOffice.length)
+      return {num: currentOffice.length}
+    },
     /* guest can book in AvailablseSchedule */
     async getAvailableSchedule(_, {office, startDate, endDate},{ AvailableSchedule, BookedSchedule }){
       // get current AvailableSchedule
