@@ -46,7 +46,9 @@ const guestResolver = {
         }])
       }
       const condition = {}
-      // titile
+
+      
+      // searchTitle
       searchTerm = formatSearch(searchTerm)
       console.log("searchTerm: " + searchTerm)
       if(searchTerm){
