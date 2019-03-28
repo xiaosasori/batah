@@ -1,6 +1,4 @@
-let a = new Date()
-a.setHours(0,0,0,0)
-let b = new Date(a.getFullYear(), a.getMonth(), a.getDate()+1)
-// let b = new Date(new Date(a.getTime()+ (24 * 60 * 60 * 1000)).setHours(0,0,0,0))
-console.log(a.getDate()+ ' '+a.getHours())
-console.log(b.getDate()+' '+b.getHours())
+let arr = []
+arr.unshift(1)
+arr.unshift(2)
+console.log(arr[0])

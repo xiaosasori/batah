@@ -115,7 +115,8 @@ const hostResolver = {
 
       await User.findOneAndUpdate(
         { _id: userId },
-        { $push: { offices: { $each: [savedOffice._id], $position: 0 } } }
+        { $push: { offices: { $each: [savedOffice._id], $position: 0 } },
+                  role: 'host' }
       );
       return savedOffice;
     },

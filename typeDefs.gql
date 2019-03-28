@@ -17,6 +17,7 @@ type User {
   avatar: String!
   userType: String
   identity: [String!]
+  role: String
 }
 
 type Office {
@@ -174,8 +175,8 @@ type Message {
   createdAt: String!
   from: User!
   to: User!
-  deliveredAt: String!
-  readAt: String!
+  readAt: String
+  content: String!
 }
 
 type Notification {
@@ -211,6 +212,11 @@ enum NOTIFICATION_TYPE {
   RESPONSIVENESS
   HOUSE_RULES
 }
+type Conversation {
+  id: ID!
+  participants: [String!]!
+  messages: [Message!]!
+}
 
 type Query {
   me: User!
@@ -225,6 +231,7 @@ type Query {
   getBookingByGuest: [Booking!]
   getBookingByHost: [Booking!]
   getTotalPrice(office: ID): Price!
+  getMessages: [Conversation!]!
 }
 
 type Price{

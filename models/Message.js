@@ -1,7 +1,7 @@
 const mongoose = require('mongoose')
 const MessageSchema = new mongoose.Schema({
     createdAt: {
-        type: String,
+        type: Date,
         default: Date.now
     },
     from: {
@@ -15,7 +15,7 @@ const MessageSchema = new mongoose.Schema({
         required: true
     },
     readAt: {
-        type: String
+        type: Date
     },
     content: {
         type: String,

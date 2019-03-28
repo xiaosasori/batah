@@ -44,7 +44,11 @@ const UserSchema = new mongoose.Schema({
     }],
     identity: [{
         type: String
-    }]
+    }],
+    role: {
+        type: String,
+        default: 'guest'
+    }
 })
 
 // Create and add avatar to user

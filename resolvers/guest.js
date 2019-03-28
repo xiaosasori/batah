@@ -146,6 +146,19 @@ const guestResolver = {
         bookee: userId,
       }).populate('bookedSchedules')
       return currentBooking;
+    },
+    async getMessages(_,{},{Conversation,Message, req}){
+      const userId = getUserId(req)
+      const conversations = await Conversation.find({participants: {$in: [userId]}})
+      .populate([{
+        path: 'messages',
+        populate: {
+          path: 'from to',
+          select: 'firstName lastName avatar'
+        }
+      }
+      ])
+      return conversations
     }
   },
   Mutation: {
@@ -296,12 +309,15 @@ const guestResolver = {
       }).save()
       return newCreditCardInformation
     },
-    async createMessage(_, { to, content}, {req, User, Message}){
+    async createMessage(_, { to, content}, {req, User, Message, Conversation}){
       const userId = getUserId(req)
       try{
         await User.findById(to)
       }catch(err){ throw new Error('User not exist')}
       const newMessage = await new Message({from: userId, to, content}).save()
+      let convo = await Conversation.findOne({participants: {$all: [userId, to]}})
+      if(convo) await Conversation.updateOne({_id: convo._id},{$push: {messages: {$each: [newMessage._id]}}})
+      else await new Conversation({participants: [userId, to], messages:[newMessage._id]}).save()
       return newMessage
     }
   }
