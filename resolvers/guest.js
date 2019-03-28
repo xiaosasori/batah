@@ -284,6 +284,10 @@ const guestResolver = {
         bookedSchedules: newBookedSchedule._id,
         payment: payment._id
       }).save()
+
+      // add View Booking
+      addViewsBooking(officeId)
+
       return newBooking
     },
     async createBookedSchedule(_, { office, date, slots }, { BookedSchedule }) {
@@ -338,6 +342,12 @@ const guestResolver = {
       if(convo) await Conversation.updateOne({_id: convo._id},{$push: {messages: {$each: [newMessage._id]}}})
       else await new Conversation({participants: [userId, to], messages:[newMessage._id]}).save()
       return newMessage
+    },
+    async addViewsBooking(_, {office}, {Views}){
+      return Views.findOneAndUpdate({office}, {$inc: {numBooking: 1}},{new: true});
+    },
+    async addViewsView(_, {office}, {Views}){
+      return Views.findOneAndUpdate({office}, {$inc: {numView: 1}},{new: true});
     }
   }
 }
