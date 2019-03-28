@@ -73,8 +73,9 @@ type OfficeRules {
 
 type Views {
   id: ID!
-  lastWeek: Int!
   office: Office!
+  numView: Int!
+  numBooking: Int!
 }
 
 type Location {
