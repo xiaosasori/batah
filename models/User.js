@@ -41,7 +41,14 @@ const UserSchema = new mongoose.Schema({
     offices: [{
         type: [mongoose.Schema.Types.ObjectId],
         ref: 'Office'
-    }]
+    }],
+    identity: [{
+        type: String
+    }],
+    role: {
+        type: String,
+        default: 'guest'
+    }
 })
 
 // Create and add avatar to user

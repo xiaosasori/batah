@@ -52,7 +52,7 @@ const guestResolver = {
 
       // area
       if(area){
-        console.log('area', area)
+        // console.log('area', area)
         const foundLocation = await Location.find({
           lat: { $gte: area.ma.from, $lte: area.ma.to },
           lng: { $gte: area.ga.from, $lte: area.ga.to }
@@ -124,13 +124,18 @@ const guestResolver = {
       // delete slots in each day
       for(element of currentAvailableSchedule){
         // get booked slots
-        console.log("Day: "+element.date);
+        // console.log("Day: "+element.date);
+        let formatDate = new Date(element.date)
+        formatDate.setHours(0,0,0,0)
+        let nextDate = new Date(formatDate.getFullYear(), formatDate.getMonth(), formatDate.getDate()+1)
         const bookedSlots = await BookedSchedule.findOne({
           office,
-          date: element.date
+          date: {"$gte": formatDate, "$lt": nextDate}
         })
         if(bookedSlots){
+        console.log(new Date(element.date))
           // delete slots are booked
+          console.log("date booked: "+bookedSlots.date)
           console.log("slots are booked: "+bookedSlots.slots)
           console.log("slots are availabled before: "+element.slots)
           for(element2 of bookedSlots.slots){
@@ -138,10 +143,14 @@ const guestResolver = {
               element.slots.splice(element.slots.indexOf(element2), 1)
           }
           console.log("slots are availabled after: "+element.slots)
+          if(element.slots.length==0) {
+            // console.log(currentAvailableSchedule.indexOf(element))
+            currentAvailableSchedule.splice(currentAvailableSchedule.indexOf(element),1)
+          }
         }
       }
 
-      console.log("AvailableSchedule result: "+currentAvailableSchedule)
+      // console.log("AvailableSchedule result: "+currentAvailableSchedule)
       return currentAvailableSchedule
     },
     /* get all booking of a guest (logined) */
@@ -152,6 +161,19 @@ const guestResolver = {
         bookee: userId,
       }).populate('bookedSchedules')
       return currentBooking;
+    },
+    async getMessages(_,{},{Conversation,Message, req}){
+      const userId = getUserId(req)
+      const conversations = await Conversation.find({participants: {$in: [userId]}})
+      .populate([{
+        path: 'messages',
+        populate: {
+          path: 'from to',
+          select: 'firstName lastName avatar'
+        }
+      }
+      ])
+      return conversations
     }
   },
   Mutation: {
@@ -216,11 +238,11 @@ const guestResolver = {
         throw new Error('Invalid token')
       }
     },
-    updateProfile(_, { email, firstName, lastName, phone }, { User, req }) {
+    updateProfile(_, { email, firstName, lastName, phone, identity, avatar }, { User, req }) {
       const userId = getUserId(req)
       const user = User.findOneAndUpdate(
         { _id: userId },
-        { email, firstName, lastName, phone },
+        { email, firstName, lastName, phone, identity, avatar },
         { new: true }
       )
       return user
@@ -235,13 +257,28 @@ const guestResolver = {
       // user can only review onece per order
       return result
     },
-    async createBooking(_, { office, bookedSchedules, payment }, { Booking, req }) {
+    async createBooking(_, { bookedSchedules }, {BookedSchedule, Office,Booking, Payment, req }) {
       const userId = getUserId(req)
+      let officeId = bookedSchedules.office
+      let office = await Office.findById(officeId).populate('pricing')
+      console.log('office', office.pricing.basePrice)
+      let totalPrice = office.pricing.basePrice * bookedSchedules.slots.length
+      console.log('totalPrice', totalPrice)
+      let serviceFee = totalPrice * 0.1
+      console.log('serviceFee', serviceFee)
+      let paymentMethod = 'paypal'
+      const payment = await new Payment({serviceFee, officePrice: office.pricing.basePrice,totalPrice,paymentMethod}).save()
+      console.log('id',payment._id)
+      const newBookedSchedule = await new BookedSchedule({
+        office: officeId,
+        date : new Date(bookedSchedules.date),
+        slots: bookedSchedules.slots
+      }).save()
       const newBooking = await new Booking({
         bookee: userId,
-        office,
-        bookedSchedules,
-        payment
+        office:officeId,
+        bookedSchedules: newBookedSchedule._id,
+        payment: payment._id
       }).save()
       return newBooking
     },
@@ -286,8 +323,18 @@ const guestResolver = {
         country
       }).save()
       return newCreditCardInformation
+    },
+    async createMessage(_, { to, content}, {req, User, Message, Conversation}){
+      const userId = getUserId(req)
+      try{
+        await User.findById(to)
+      }catch(err){ throw new Error('User not exist')}
+      const newMessage = await new Message({from: userId, to, content}).save()
+      let convo = await Conversation.findOne({participants: {$all: [userId, to]}})
+      if(convo) await Conversation.updateOne({_id: convo._id},{$push: {messages: {$each: [newMessage._id]}}})
+      else await new Conversation({participants: [userId, to], messages:[newMessage._id]}).save()
+      return newMessage
     }
-
   }
 }
 

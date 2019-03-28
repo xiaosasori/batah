@@ -16,6 +16,8 @@ type User {
   notifications: [Notification!]!
   avatar: String!
   userType: String
+  identity: [String!]
+  role: String
 }
 
 type Office {
@@ -173,8 +175,8 @@ type Message {
   createdAt: String!
   from: User!
   to: User!
-  deliveredAt: String!
-  readAt: String!
+  readAt: String
+  content: String!
 }
 
 type Notification {
@@ -210,6 +212,11 @@ enum NOTIFICATION_TYPE {
   RESPONSIVENESS
   HOUSE_RULES
 }
+type Conversation {
+  id: ID!
+  participants: [String!]!
+  messages: [Message!]!
+}
 
 type Query {
   me: User!
@@ -226,6 +233,7 @@ type Query {
   getBookingByGuest: [Booking!]
   getBookingByHost: [Booking!]
   getTotalPrice(office: ID): Price!
+  getMessages: [Conversation!]!
 }
 
 type Price{
@@ -259,6 +267,8 @@ type Mutation {
     lastName: String!
     email: String!
     phone: String
+    avatar: String
+    identity: [String!]
   ): User!
   createList(
     city: String!
@@ -288,9 +298,7 @@ type Mutation {
     office: String!
     user: String!): Review!
   createBooking(
-    office: ID!
-    bookedSchedules: [ID!]!
-    payment: ID
+    bookedSchedules: BookedScheduleInput!
   ): Booking!
   createBookedSchedule(
     office: ID!
@@ -329,6 +337,12 @@ type Mutation {
     fullName: String!
     country: String!
   ): CreditCardInformation!
+  createMessage(to: ID! content: String!): Message!
+}
+input BookedScheduleInput {
+  office: ID!
+    date: String!
+    slots: [Int!]!
 }
 input ScheduleInput {
     date: String!

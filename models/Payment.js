@@ -17,8 +17,7 @@ const PaymentSchema = new mongoose.Schema({
         required: true
     },
     paymentMethod: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'PaymentAccount',
+        type: String,
         required: true
     },
 })

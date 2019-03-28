@@ -1,8 +1,8 @@
 const mongoose = require('mongoose')
 const MessageSchema = new mongoose.Schema({
     createdAt: {
-        type: String,
-        required: true
+        type: Date,
+        default: Date.now
     },
     from: {
         type: mongoose.Schema.Types.ObjectId,
@@ -14,13 +14,12 @@ const MessageSchema = new mongoose.Schema({
         ref: 'User',
         required: true
     },
-    deliveredAt: {
-        type: String,
-        required: true
-    },
     readAt: {
+        type: Date
+    },
+    content: {
         type: String,
         required: true
-    },
+    }
 })
 module.exports = mongoose.model('Message', MessageSchema)

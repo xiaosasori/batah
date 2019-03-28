@@ -1,3 +1,4 @@
-let cate = ['teaching', 'meeting'];
-let off = 'teaching'
-console.log(cate.includes(off))
+let arr = []
+arr.unshift(1)
+arr.unshift(2)
+console.log(arr[0])
