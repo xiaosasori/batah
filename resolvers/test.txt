@@ -72,4 +72,20 @@ mutation {
     id
     createdAt
   }
+  createRevenue(host: "5c906c8bc548932224ef4e12"){
+    id
+    withdrawable
+    total
+  }
+  addMoneyToRevenue(host: "5c906c8bc548932224ef4e12", money: 100){
+    id
+    withdrawable
+    total
+  }
+  withdrawRevenue(host: "5c906c8bc548932224ef4e12", money: 20){
+    id
+    withdrawable
+    total
+  }
+  
 }

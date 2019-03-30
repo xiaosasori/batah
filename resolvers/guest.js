@@ -207,6 +207,10 @@ const guestResolver = {
         email,
         avatar: `http://gravatar.com/avatar/${email}?d=identicon`
       }).save()
+
+      // create Revenue
+      createRevenue({host: newUser._id})
+      
       return {
         user: newUser,
         token: createToken(newUser, '1hr')
@@ -299,7 +303,10 @@ const guestResolver = {
       }).save()
 
       // add View Booking
-      addViewsBooking(officeId)
+      addViewsBooking({office: officeId})
+
+      // add Revenue
+      addMoneyToRevenue({host: office.host, money: totalPrice-serviceFee})
 
       return newBooking
     },
@@ -365,6 +372,21 @@ const guestResolver = {
     },
     async addViewsView(_, {office}, {Views}){
       return Views.findOneAndUpdate({office}, {$inc: {numView: 1}},{new: true});
+    },
+    async addMoneyToRevenue(_, { host, money }, { Revenue }) {
+      return await Revenue.findOneAndUpdate({
+        host
+      }, {
+          $inc: { total: money, withdrawable: money }
+        }, { new: true })
+    },
+    async createRevenue(_, { host }, {Revenue}){
+      const newRevenue = await new Revenue({
+        host,
+        total: 0,
+        withdrawable: 0
+      }).save()
+      return newRevenue
     }
   }
 }

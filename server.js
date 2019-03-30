@@ -17,6 +17,7 @@ const CreditCardInformation = require('./models/CreditCardInformation')
 const Conversation = require('./models/Conversation')
 const Message = require('./models/Message')
 const Views = require('./models/Views')
+const Revenue = require('./models/Revenue')
 
 // import models
 require('dotenv').config({path: 'variables.env'})
@@ -60,6 +61,7 @@ const server = new ApolloServer({
       Message,
       Conversation,
       Views,
+      Revenue,
       req
     }
   }
