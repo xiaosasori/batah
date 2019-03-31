@@ -1,4 +1,2 @@
-let arr = []
-arr.unshift(1)
-arr.unshift(2)
-console.log(arr[0])
+let a ={ b:1,c: a['b']}
+console.log(a)

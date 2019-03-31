@@ -35,7 +35,10 @@ const guestResolver = {
     async searchOffice(_, { searchTerm, area, category }, { Office, Location }) {
       console.log("Function: searchOffice")
       if(!searchTerm && !area){
-        return await Office.find({}).populate([{
+        let condition = {}
+        console.log(category)
+        if(category !=='all') condition.category = category
+        return await Office.find(condition).populate([{
           path: 'pricing'
         },{
           path: 'location'
@@ -65,6 +68,7 @@ const guestResolver = {
       }
 
       // category
+      console.log('category',category)
       if(category && category!=='all') condition.category = category  
       return await Office.find(condition).populate([{
         path: 'pricing'
