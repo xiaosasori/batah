@@ -145,6 +145,14 @@ const hostResolver = {
         numBooking: 0
       }).save()
       return newViews
+    },
+    async withdrawRevenue(_, { host, money }, { Revenue }) {
+      return await Revenue.findOneAndUpdate({
+        host,
+        withdrawable: { $gte: money }
+      }, {
+          $inc: { withdrawable: - money }
+        }, { new: true })
     }
   }
 };
