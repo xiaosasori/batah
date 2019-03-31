@@ -235,32 +235,39 @@ type Query {
   getOffices: [Office!] 
   getOffice(id: String!): Office!
   searchOfficeByFilter(id: [ID!]!, minSize: Int, maxSize: Int, minNumSeats: Int, maxNumSeats: Int, minPrice: Int, maxPice: Int, amenities: [String!]): [Office!]
-  topBookingOffice(num: Int!): Office!
-  findNumOffice(sContain: String!): Num!
+  topBookingOffice: [Office!]!
+  getNumOffice: [Int!]!
   getAvailableSchedule(office: ID!, startDate: String, endDate: String): [AvailableSchedule!]
   getBookedSchedule(office: ID!, startDate: String, endDate: String): [BookedSchedule!]
   getBookingByGuest: [Booking!]
   getBookingByHost: [Booking!]
   getTotalPrice(office: ID): Price!
   getMessages: [Conversation!]!
+  addView: Views
+  getDashboard: DashBoard!
+}
+
+type DashBoard {
+  activeOffices: Int!
+  totalViews: Int!
+  totalBooking: Int!
+  totalReviews: Int!
 }
 
 type Price{
   price: Float
 }
 
-type Num{
-  num: Int
-}
-
 input AreaInput{
   ga: BoundInput
   ma: BoundInput
 }
+
 input BoundInput{
   from: Float
   to: Float
 }
+
 type Mutation {
   signup(
     email: String!

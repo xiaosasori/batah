@@ -1,6 +1,8 @@
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const moment = require('moment-timezone');
+const Views = require('./models/Views')
+const Revenue = require('./models/Revenue')
 
 const createToken = (user, expiresIn) => {
   const { _id: userId, email } = user;
@@ -69,10 +71,27 @@ const formatSearch = (str) => {
   return str
 };
 
-module.exports = { createToken, getUserId, hashPassword, getDaysLeftInMonth, formatSearch };
+const addViewsView = async (office) => {
+  return await Views.findOneAndUpdate({office}, {$inc: {numView: 1}},{new: true});
+}
+
+const addViewsBooking = async (office) => {
+  return await Views.findOneAndUpdate({office}, {$inc: {numBooking: 1}},{new: true});
+}
+
+const addMoneyToRevenue = async ({host,total,withdrawable}) => {
+  return await Revenue.findOneAndUpdate({
+    host
+  }, {
+      $inc: { total, withdrawable }
+    }, { new: true })
+}
+
+module.exports = { createToken, getUserId, hashPassword, getDaysLeftInMonth, formatSearch,
+  addViewsView, addViewsBooking, addMoneyToRevenue};
 // let a = new Date()
 // a.setHours(0,0,0,0)
 // let b = new Date(a.getFullYear(), a.getMonth(), a.getDate()+1)
 // // let b = new Date(new Date(a.getTime()+ (24 * 60 * 60 * 1000)).setHours(0,0,0,0))
 // console.log(a.getDate()+ ' '+a.getHours())
-// console.log(b.getDate()+' '+b.getHours())
+      // console.log(b.getDate()+' '+b.getHours())

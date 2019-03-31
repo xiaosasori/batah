@@ -7,10 +7,12 @@ const ViewsSchema = new mongoose.Schema({
     },
     numView: {
         type: Number,
+        default: 0,
         required: true
     },
     numBooking: {
         type: Number,
+        default: 0,
         required: true
     }
 })

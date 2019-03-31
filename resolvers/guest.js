@@ -2,7 +2,8 @@ const {
   hashPassword,
   createToken,
   getUserId,
-  formatSearch
+  formatSearch,
+  addViewsView, addViewsBooking, addMoneyToRevenue
 } = require('../utils')
 const bcryptjs = require('bcryptjs')
 const { OAuth2Client } = require('google-auth-library')
@@ -14,7 +15,7 @@ const guestResolver = {
       const userId = getUserId(req)
       return await User.findById(userId)
     },
-    async getOffice(_, args, {Office, Review}){
+    async getOffice(_, args, {Office, Review, Views}){
       const office = await Office.findOne({_id: args.id}).populate([{
         path: 'pricing'
       },{
@@ -30,6 +31,7 @@ const guestResolver = {
           select: 'firstName lastName avatar'
         }
       }])
+      await addViewsView(office._id)
       return office
     },
     async searchOffice(_, { searchTerm, area, category }, { Office, Location }) {
@@ -106,19 +108,32 @@ const guestResolver = {
       return Office.find(condition)
     },
     // top booking offices
-    async topBookingOffice(_, { num }, { Office, Booking }) {
-      const condition = {}
-      
-      return await Office.find(condition)
+    async topBookingOffice(_, {}, { Office, Booking, Views }) {
+      let topOffices =await Views.find().sort('-numBooking').limit(10)
+      let result = []
+      for(el of topOffices){
+        let foundOffice = await Office.findOne({_id: el.office}).populate({
+          path: 'reviews',
+          select: 'stars'
+        }).select('id title address pictures ')
+        result.push(foundOffice)
+      }
+      // console.log(result)
+      return result
     },
     // find num office contain address
-    async findNumOffice(_, { sContain }, { Office }) { // eg: sContain = Hà Nội
+    async getNumOffice(_, { }, { Office }) { // eg: sContain = Hà Nội
       console.log("Function: findNumOffice")
       const condition = {}
-      condition.address = { "$regex": sContain, "$options": "i" }
-      const currentOffice = await Office.find(condition)
-      console.log(currentOffice.length)
-      return {num: currentOffice.length}
+      let sContain = ['Hà Nội', 'Đà Nẵng', 'Hồ Chí Minh']
+      let results = []
+      for(s of sContain){
+        condition.address = { "$regex": s, "$options": "i" }
+        const currentOffice = await Office.find(condition)
+        results.push(currentOffice.length)
+      }
+      // console.log(results)
+      return results
     },
     /* guest can book in AvailablseSchedule */
     async getAvailableSchedule(_, {office, startDate, endDate},{ AvailableSchedule, BookedSchedule }){
@@ -196,6 +211,35 @@ const guestResolver = {
       }])
       return conversations
     },
+    async addView(_,{},{Views, Office}){
+      const offices = await Office.find()
+      for(o of offices){
+        // console.log(o._id)
+        await new Views({office: o._id}).save()
+      }
+    },
+    async getDashboard(_,{},{req,User, Office, Views, Review}){
+      const userId = getUserId(req)
+      const user = await User.findById(userId)
+      const result = {totalViews: 0, totalBooking:0, totalReviews:0}
+      if(user.role==='guest') throw new Error('You have no access to this page')
+      else if(user.role==='host'){
+        //get all offices of user 
+        // TODO: find where status is active
+        const userOffices = await Office.find({host: user._id}).select('_id reviews')
+        result.activeOffices =  userOffices.length
+        for(office of userOffices){
+          // add totalView totalBooking
+          let view = await Views.findOne({office: office._id}).select('numView numBooking')
+          result.totalViews += view.numView
+          result.totalBooking += view.numBooking
+          // add totalReviews
+          result.totalReviews += office.reviews.length
+        }
+      }
+      // console.log('res: ',result)
+      return result
+    }
   },
   Mutation: {
     async signup(_, { email, password, firstName, lastName }, { User }) {
@@ -282,8 +326,8 @@ const guestResolver = {
       // user can only review onece per order
       return result
     },
-    async createBooking(_, { bookedSchedules }, {BookedSchedule, Office,Booking, Payment, req }) {
-      const userId = getUserId(req)
+    async createBooking(_, { bookedSchedules, firstName, lastName, phone, email }, {BookedSchedule, Office,Booking, Payment, req }) {
+      const userId = getUserId(req, false)
       let officeId = bookedSchedules.office
       let office = await Office.findById(officeId).populate('pricing')
       console.log('office', office.pricing.basePrice)
@@ -300,6 +344,10 @@ const guestResolver = {
         slots: bookedSchedules.slots
       }).save()
       const newBooking = await new Booking({
+        firstName,
+        lastName,
+        phone,
+        email,
         bookee: userId,
         office:officeId,
         bookedSchedules: newBookedSchedule._id,
@@ -307,10 +355,10 @@ const guestResolver = {
       }).save()
 
       // add View Booking
-      addViewsBooking({office: officeId})
+      await addViewsBooking(officeId)
 
       // add Revenue
-      addMoneyToRevenue({host: office.host, money: totalPrice-serviceFee})
+      await addMoneyToRevenue({host: office.host, total: totalPrice, withdrawable:serviceFee})
 
       return newBooking
     },

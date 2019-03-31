@@ -6,7 +6,7 @@ const PlaceSchema = new mongoose.Schema({
     },
     searchTitle: {
         type: String,
-        required: true
+        // required: true
     },
     category: {
         type: String,
