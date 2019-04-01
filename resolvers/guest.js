@@ -15,7 +15,7 @@ const guestResolver = {
       const userId = getUserId(req)
       return await User.findById(userId)
     },
-    async getOffice(_, args, {Office, Review, Views}){
+    async getOffice(_, args, {Office, Booking, req}){
       const office = await Office.findOne({_id: args.id}).populate([{
         path: 'pricing'
       },{
@@ -32,6 +32,7 @@ const guestResolver = {
         }
       }])
       await addViewsView(office._id)
+
       return office
     },
     async searchOffice(_, { searchTerm, area, category }, { Office, Location }) {
@@ -211,12 +212,19 @@ const guestResolver = {
       }])
       return conversations
     },
-    async addView(_,{},{Views, Office}){
-      const offices = await Office.find()
-      for(o of offices){
-        // console.log(o._id)
-        await new Views({office: o._id}).save()
+    async addView(_,{},{Views, Office, Revenue}){
+      console.log('addView')
+      let offices = await Office.find()
+      for(office of offices){
+        await new Revenue({host: office.host}).save()
       }
+      // await Office.update({}, {status: 'pending'}, {multi:true})
+      // const offices = await Office.find()
+      // for(o of offices){
+      //   o.
+      // //   // console.log(o._id)
+      // //   await new Views({office: o._id}).save()
+      // }
     },
     async getDashboard(_,{},{req,User, Office, Views, Review}){
       const userId = getUserId(req)
@@ -239,7 +247,16 @@ const guestResolver = {
       }
       // console.log('res: ',result)
       return result
-    }
+    },
+    async canReview(_, {office}, { Booking, req}){
+      let canReview = false
+      const userId = getUserId(req, false)
+      if(userId) {
+        let booking = await Booking.findOne({bookee: userId, office})
+        if(booking) canReview = true
+      }
+      return canReview
+    },
   },
   Mutation: {
     async signup(_, { email, password, firstName, lastName }, { User }) {
@@ -316,14 +333,18 @@ const guestResolver = {
       )
       return user
     },
-    async createReview(_, {text,cleanliness,accurracy, location, checkIn,office,user}, {User, Office, Review, req}){
+    async createReview(_, {text,cleanliness,accuracy, location, checkIn,office}, {User, Office, Review,Booking, req}){
+      console.log('createReview')
       const userId = getUserId(req)
       //need to check if user has booked this
-      const stars= ((cleanliness+accurracy+ location+ checkIn)/4).toFixed(2)
-      const newReview =  await new Review({text,stars,cleanliness,accurracy, location, checkIn,office,user}).save()
+      let booking = await Booking.find({bookee: userId, office})
+      if(!booking) throw new Error('You cannot leave review to this office')
+      const stars= ((cleanliness+accuracy+ location+ checkIn)/4).toFixed(2)
+      const newReview =  await new Review({text,stars,cleanliness,accuracy, location, checkIn,office,user:userId}).save()
       await Office.findOneAndUpdate({_id: office},{ $push: {reviews:{$each: [newReview._id]}} })
       const result = await Review.findById(newReview._id).populate('user','firstName lastName avatar')
       // user can only review onece per order
+      console.log('result review: ',result)
       return result
     },
     async createBooking(_, { bookedSchedules, firstName, lastName, phone, email }, {BookedSchedule, Office,Booking, Payment, req }) {

@@ -1,4 +1,5 @@
-const {ApolloServer, AuthenticationError} = require('apollo-server');
+const {ApolloServer, AuthenticationError, PubSub } = require('apollo-server');
+const pubsub = new PubSub();
 const mongoose = require('mongoose');
 // import models
 const User = require('./models/User')
@@ -62,7 +63,8 @@ const server = new ApolloServer({
       Conversation,
       Views,
       Revenue,
-      req
+      req,
+      pubsub
     }
   }
 })

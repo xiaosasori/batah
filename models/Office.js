@@ -45,6 +45,10 @@ const PlaceSchema = new mongoose.Schema({
     tags: {
         type: Array
     },
+    status: {
+        type: String,
+        default: 'Pending'
+    },
     reviews: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Review',

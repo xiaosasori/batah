@@ -45,7 +45,7 @@ type Office {
   pictures: [String!]!
   popularity: Int!
   tags: [String!]!
-  status: String 
+  status: String
 }
 
 type Pricing {
@@ -108,7 +108,7 @@ type Review {
   text: String!
   stars: Float!
   cleanliness: Int!
-  accurracy: Int!
+  accuracy: Int!
   location: Int!
   checkIn: Int!
   office: Office!
@@ -184,10 +184,10 @@ type Message {
 type Notification {
   id: ID!
   createdAt: String!
-  type: NOTIFICATION_TYPE
+  type: String!
   user: User!
-  link: String!
-  readDate: String!
+  content: String!
+  office: Office!
 }
 
 type Revenue {
@@ -216,10 +216,9 @@ enum PAYMENT_PROVIDER {
 }
 
 enum NOTIFICATION_TYPE {
-  OFFER
-  INSTANT_BOOK
-  RESPONSIVENESS
-  HOUSE_RULES
+  APPROVE
+  BOOK
+  REVIEW
 }
 type Conversation {
   id: ID!
@@ -245,6 +244,12 @@ type Query {
   getMessages: [Conversation!]!
   addView: Views
   getDashboard: DashBoard!
+  canReview(office: ID!): Boolean!
+}
+
+
+type Subscription {
+  notification: Notification!
 }
 
 type DashBoard {
@@ -308,11 +313,10 @@ type Mutation {
   ): Office!
   createReview(text: String!
     cleanliness: Int!
-    accurracy: Int!
+    accuracy: Int!
     location: Int!
     checkIn: Int!
-    office: String!
-    user: String!): Review!
+    office: String!): Review!
   createBooking(
     bookedSchedules: BookedScheduleInput!
   ): Booking!

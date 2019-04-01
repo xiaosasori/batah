@@ -12,7 +12,7 @@ const ReviewSchema = new mongoose.Schema({
         type: Number,
         required: true
     },
-    accurracy: {
+    accuracy: {
         type: Number,
         required: true
     },

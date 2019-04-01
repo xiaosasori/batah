@@ -7,11 +7,11 @@ const RevenueSchema = new mongoose.Schema({
     },
     total: {
         type: Number,
-        required: true
+        default: 0
     },
     withdrawable: {
         type: Number,
-        required: true
+        default: 0
     }
 })
 module.exports = mongoose.model('Revenue', RevenueSchema)
