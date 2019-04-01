@@ -82,10 +82,15 @@ mutation {
     withdrawable
     total
   }
-  withdrawRevenue(host: "5c906c8bc548932224ef4e12", money: 20){
+  withdrawRevenue(host: "5c906c8bc548932224ef4e12", money: 5){
     id
     withdrawable
     total
   }
-  
+  acceptPayoutPending(host: "5c906c8bc548932224ef4e12"){
+    id
+    createdAt
+    status
+    money
+  }
 }
