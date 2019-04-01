@@ -373,6 +373,8 @@ type Mutation {
   createRevenue(host: ID!): Revenue!
   addMoneyToRevenue(host: ID! money: Float!): Revenue!
   withdrawRevenue(host: ID! money: Float!): Revenue!
+  acceptPayoutPending(host: ID!): PayoutPending!
+  createPayoutPending(host: ID! money: Float!): PayoutPending!
 }
 input BookedScheduleInput {
   office: ID!
