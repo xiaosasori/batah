@@ -197,6 +197,14 @@ type Revenue {
   withdrawable: Float!
 }
 
+type PayoutPending {
+  id: ID!
+  createdAt: String!
+  host: User!
+  money: Float!
+  status: String
+}
+
 enum CURRENCY {
   EUR
   JPY

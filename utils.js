@@ -3,6 +3,7 @@ const bcrypt = require('bcryptjs');
 const moment = require('moment-timezone');
 const Views = require('./models/Views')
 const Revenue = require('./models/Revenue')
+const PayoutPending = require('./models/PayoutPending')
 
 const createToken = (user, expiresIn) => {
   const { _id: userId, email } = user;
@@ -85,6 +86,23 @@ const addMoneyToRevenue = async ({host,total,withdrawable}) => {
   }, {
       $inc: { total, withdrawable }
     }, { new: true })
+}
+
+const createRevenue = async({ host }) => {
+  const newRevenue = await new Revenue({
+    host,
+    total: 0,
+    withdrawable: 0
+  }).save()
+  return newRevenue
+}
+
+const createPayoutPending = async ({ host, money }) => {
+  const newPayoutPending = await new PayoutPending({
+    host,
+    money
+  }).save()
+  return newPayoutPending
 }
 
 module.exports = { createToken, getUserId, hashPassword, getDaysLeftInMonth, formatSearch,

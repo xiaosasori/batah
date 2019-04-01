@@ -3,7 +3,7 @@ const {
   createToken,
   getUserId,
   formatSearch,
-  addViewsView, addViewsBooking, addMoneyToRevenue
+  addViewsView, addViewsBooking, addMoneyToRevenue, createRevenue
 } = require('../utils')
 const bcryptjs = require('bcryptjs')
 const { OAuth2Client } = require('google-auth-library')
@@ -274,7 +274,7 @@ const guestResolver = {
       }).save()
 
       // create Revenue
-      createRevenue({host: newUser._id})
+      await createRevenue({host: newUser._id})
       
       return {
         user: newUser,
@@ -379,7 +379,7 @@ const guestResolver = {
       await addViewsBooking(officeId)
 
       // add Revenue
-      await addMoneyToRevenue({host: office.host, total: totalPrice, withdrawable:serviceFee})
+      await addMoneyToRevenue({host: office.host, total: totalPrice - serviceFee, withdrawable: totalPrice - serviceFee})
 
       return newBooking
     },
