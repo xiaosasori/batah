@@ -116,12 +116,14 @@ const hostResolver = {
 
       // if admin haven't accept (status = unpaid) the last request => can not withdraw
       const currentPayoutPending = await PayoutPending.find({host, status: "unpaid"})
-      if(currentPayoutPending) return null
+      if(currentPayoutPending!="") {
+        return null
+      }
 
       // edit Revenue (-withdrawable)
       const currentRevenue = await Revenue.findOneAndUpdate({
         host,
-        withdrawable: { $gte: money }
+        withdrawable: { $gte: money } // if money > withdrawable => can not widthdraw
       }, {
           $inc: { withdrawable: - money }
         }, { new: true })

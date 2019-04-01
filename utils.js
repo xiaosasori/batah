@@ -106,7 +106,7 @@ const createPayoutPending = async ({ host, money }) => {
 }
 
 module.exports = { createToken, getUserId, hashPassword, getDaysLeftInMonth, formatSearch,
-  addViewsView, addViewsBooking, addMoneyToRevenue};
+  addViewsView, addViewsBooking, addMoneyToRevenue, createRevenue, createPayoutPending};
 // let a = new Date()
 // a.setHours(0,0,0,0)
 // let b = new Date(a.getFullYear(), a.getMonth(), a.getDate()+1)

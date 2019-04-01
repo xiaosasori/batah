@@ -8,7 +8,8 @@ const adminResolver = {
     async acceptPayoutPending(_, { host }, { PayoutPending }) {
       // in a time, only have 1 PayoutPending for a host (see withdrawRevenue)
       const currentPayoutPending = await PayoutPending.findOneAndUpdate({
-        host
+        host,
+        status: "unpaid"
       }, {
           status: "paid"
         }, { new: true })
