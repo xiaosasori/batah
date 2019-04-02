@@ -159,19 +159,21 @@ const hostResolver = {
       }).save()
       return newViews
     },
-    async withdrawRevenue(_, {  money }, { User, Revenue, PayoutPending, req }) {
-      const userId = getUserId(req)
-      const user = await User.findById(userId)
-      if(user.role !== 'host') throw new Error('You cannot withdraw')
+    async withdrawRevenue(_, { host }, { Revenue, PayoutPending }) {
+
       // if admin haven't accept (status = unpaid) the last request => can not withdraw
       const currentPayoutPending = await PayoutPending.find({host: userId, status: "unpaid"})
       if(!!currentPayoutPending) {
         return null
       }
+
+      const revenueWithdraw = await Revenue.findOne({host})
+      const money = revenueWithdraw.withdrawable
+      console.log("money", money)
+      if(money==0) return null // canot withdraw if money = 0
       // edit Revenue (-withdrawable)
       const currentRevenue = await Revenue.findOneAndUpdate({
-        host,
-        withdrawable: { $gte: money } // if money > withdrawable => can not widthdraw
+        host
       }, {
           $inc: { withdrawable: - money }
         }, { new: true })
