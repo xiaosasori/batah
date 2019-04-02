@@ -3,6 +3,8 @@ const bcrypt = require('bcryptjs');
 const moment = require('moment-timezone');
 const Views = require('./models/Views')
 const Revenue = require('./models/Revenue')
+const AvailableSchedule = require('./models/AvailableSchedule')
+const BookedSchedule = require('./models/BookedSchedule')
 const PayoutPending = require('./models/PayoutPending')
 
 const createToken = (user, expiresIn) => {
@@ -88,6 +90,44 @@ const addMoneyToRevenue = async ({host,total,withdrawable}) => {
     }, { new: true })
 }
 
+const getAvailableSchedule = async(office) => {
+  // get current AvailableSchedule
+  console.log("Function: getAvailableSchedule");
+  let currentAvailableSchedule = await AvailableSchedule.find({
+    office,
+    // date: {$gte: new Date(startDate),  $lte: new Date(endDate) }
+  })
+  // delete slots in each day
+  for(element of currentAvailableSchedule){
+    // get booked slots
+    // console.log("Day: "+element.date);
+    let formatDate = new Date(element.date)
+    formatDate.setHours(0,0,0,0)
+    let nextDate = new Date(formatDate.getFullYear(), formatDate.getMonth(), formatDate.getDate()+1)
+    const bookedSlots = await BookedSchedule.findOne({
+      office,
+      date: {"$gte": formatDate, "$lt": nextDate}
+    })
+    if(bookedSlots){
+    console.log(new Date(element.date))
+      // delete slots are booked
+      // console.log("date booked: "+bookedSlots.date)
+      // console.log("slots are booked: "+bookedSlots.slots)
+      // console.log("slots are availabled before: "+element.slots)
+      for(element2 of bookedSlots.slots){
+        if(element.slots.indexOf(element2)>=0)
+          element.slots.splice(element.slots.indexOf(element2), 1)
+      }
+      // console.log("slots are availabled after: "+element.slots)
+      if(element.slots.length==0) {
+        // console.log(currentAvailableSchedule.indexOf(element))
+        currentAvailableSchedule.splice(currentAvailableSchedule.indexOf(element),1)
+      }
+    }
+  }
+  // console.log("AvailableSchedule result: "+currentAvailableSchedule)
+  return currentAvailableSchedule
+}
 const createRevenue = async({ host }) => {
   const newRevenue = await new Revenue({
     host,
@@ -106,7 +146,8 @@ const createPayoutPending = async ({ host, money }) => {
 }
 
 module.exports = { createToken, getUserId, hashPassword, getDaysLeftInMonth, formatSearch,
-  addViewsView, addViewsBooking, addMoneyToRevenue, createRevenue, createPayoutPending};
+  addViewsView, addViewsBooking, addMoneyToRevenue, getAvailableSchedule,createRevenue, createPayoutPending};
+
 // let a = new Date()
 // a.setHours(0,0,0,0)
 // let b = new Date(a.getFullYear(), a.getMonth(), a.getDate()+1)

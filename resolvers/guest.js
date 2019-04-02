@@ -3,7 +3,8 @@ const {
   createToken,
   getUserId,
   formatSearch,
-  addViewsView, addViewsBooking, addMoneyToRevenue, createRevenue
+  addViewsView, addViewsBooking, addMoneyToRevenue, getAvailableSchedule,
+  createRevenue
 } = require('../utils')
 const bcryptjs = require('bcryptjs')
 const { OAuth2Client } = require('google-auth-library')
@@ -37,26 +38,13 @@ const guestResolver = {
     },
     async searchOffice(_, { searchTerm, area, category }, { Office, Location }) {
       console.log("Function: searchOffice")
-      if(!searchTerm && !area){
-        let condition = {}
-        console.log(category)
-        if(category !=='all') condition.category = category
-        return await Office.find(condition).populate([{
-          path: 'pricing'
-        },{
-          path: 'location'
-        },{
-          path: 'officeRules'
-        }, {
-          path: 'reviews'
-        }])
-      }
       const condition = {}
 
       // searchTitle
-      searchTerm = formatSearch(searchTerm)
+      
       console.log("searchTerm: " + searchTerm)
       if(searchTerm){
+        searchTerm = formatSearch(searchTerm)
         condition.searchTitle = { "$regex": searchTerm, "$options": "i" }
       }
 
@@ -73,15 +61,34 @@ const guestResolver = {
       // category
       console.log('category',category)
       if(category && category!=='all') condition.category = category  
-      return await Office.find(condition).populate([{
+      let foundOffices = await Office.find(condition).populate([{
         path: 'pricing'
       },{
         path: 'location'
-      },{
-        path: 'officeRules'
       }, {
         path: 'reviews'
       }])
+      console.log('found: ',foundOffices.length)
+      let scheduleByOffice = null; //schedule of a office
+        let result = [];
+        for (office of foundOffices) { //loop over all founded offices
+          // create a copy of office
+          let { id, title,category, address, shortDescription,numSeats, pictures,
+            tags,status,reviews,size, pricing, location} = office
+          let tmp = {id, title, category,address, shortDescription,numSeats, 
+            pictures,tags,reviews,size, status,pricing, location}
+
+          let daysResult = [] // available days array of current office
+          scheduleByOffice  = await getAvailableSchedule(office._id)
+          for(dayAvailable of scheduleByOffice){
+            daysResult.push(dayAvailable.date) //return array of day available
+          }
+          tmp.availableSchedule = daysResult // assign to tmp office
+          result.push(tmp) // add tmp office to result
+          // console.log(office.daysAvailable)
+        }
+        console.log('res length: ',result.length)
+        return result
     },
     async searchOfficeByFilter(_, { id, minSize, maxSize, minNumSeats, maxNumSeats, minPrice, maxPrice, amenities }, { Office, Pricing }) {
       const condition = {}
@@ -257,6 +264,19 @@ const guestResolver = {
       }
       return canReview
     },
+    async getBookmarks(_,{},{req, User}){
+      const userId = getUserId(req,false)
+      let officesBookmarked = await User.findById(userId).populate({
+        path: 'bookmarks',
+        model: 'Office',
+        select: 'title address pictures',
+        populate: {
+          path: 'reviews',
+          model: 'Review',
+        }
+      }).select('bookmarks')
+      return officesBookmarked.bookmarks
+    }
   },
   Mutation: {
     async signup(_, { email, password, firstName, lastName }, { User }) {
@@ -333,14 +353,14 @@ const guestResolver = {
       )
       return user
     },
-    async createReview(_, {text,cleanliness,accuracy, location, checkIn,office}, {User, Office, Review,Booking, req}){
+    async createReview(_, {text,cleanliness,accuracy, location, checkIn,office, pictures}, {User, Office, Review,Booking, req}){
       console.log('createReview')
       const userId = getUserId(req)
       //need to check if user has booked this
       let booking = await Booking.find({bookee: userId, office})
       if(!booking) throw new Error('You cannot leave review to this office')
       const stars= ((cleanliness+accuracy+ location+ checkIn)/4).toFixed(2)
-      const newReview =  await new Review({text,stars,cleanliness,accuracy, location, checkIn,office,user:userId}).save()
+      const newReview =  await new Review({pictures,text,stars,cleanliness,accuracy, location, checkIn,office,user:userId}).save()
       await Office.findOneAndUpdate({_id: office},{ $push: {reviews:{$each: [newReview._id]}} })
       const result = await Review.findById(newReview._id).populate('user','firstName lastName avatar')
       // user can only review onece per order
@@ -460,7 +480,35 @@ const guestResolver = {
         withdrawable: 0
       }).save()
       return newRevenue
-    }
+    },
+    bookmarkOffice: async (_, { office }, { req, Office, User }) => {
+      const userId = getUserId(req, false)
+      if(!userId) return 'You need to login to do this action.'
+      console.log('bookmarkOff')
+      // Find User, add id of post to its favorites array (which will be populated as Posts)
+      try{
+        const user = await User.findOneAndUpdate(
+          { _id: userId },
+          { $addToSet: { bookmarks: office } },
+          { new: true }
+      )
+      return 'Bookmark added'
+      }catch(err) {return 'Cannot add bookmark :('}
+  },
+  unBookmarkOffice: async (_, { office }, { req, User }) => {
+    const userId = getUserId(req, false)
+    console.log('unbookmarkOff')
+
+    if(!userId) return 'You need to login to do this action.'
+    try{
+      const user = await User.findOneAndUpdate(
+          { _id: userId },
+          { $pull: { bookmarks: office } },
+          { new: true }
+      )
+      return 'Bookmark removed'
+    }catch(err) {return 'Cannot remove bookmark :('}
+  },
   }
 }
 module.exports =  guestResolver

@@ -28,6 +28,9 @@ const ReviewSchema = new mongoose.Schema({
         type: Number,
         required: true
     },
+    pictures: {
+        type: Array
+    },
     office: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Office',

@@ -1,2 +1,3 @@
-let a ={ b:1,c: a['b']}
-console.log(a)
+let a = [ 4,5]
+      console.log(a.pop())
+      console.log(a)
