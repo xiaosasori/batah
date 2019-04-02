@@ -59,6 +59,26 @@ const hostResolver = {
       }
       console.log("Total price: " + sum)
       return {price: sum};
+    },
+    async getRevenue(_, {},{ User,Revenue, Booking, Payment,Office, req }){
+      const userId = getUserId(req)
+      let user = await User.findById(userId).populate({
+        path: 'offices',
+        model: 'Office'
+      })
+      if(user.role !== 'host') throw new Error('You have no access to this')
+      const revenue = await Revenue.findOne({host: userId}) // {host,total, withdrawable}
+      let bookings = []
+      for(office of user.offices){
+        console.log(office._id)
+        let booking = await Booking.find({office:office._id}).populate({
+          path: 'payment', //{payment:{totalPrice}, createdAt}
+          model: 'Payment',
+          select: 'totalPrice'
+        }).select('createdAt')
+        console.log(booking)
+      }
+
     }
   },
   Mutation: {

@@ -256,6 +256,8 @@ type Query {
   addView: Views
   getDashboard: DashBoard!
   canReview(office: ID!): Boolean!
+  getBookmarks: [Office!]
+  getRevenue: Booking
 }
 
 type searchOfficesPayload {
@@ -317,7 +319,7 @@ type Mutation {
     lastName: String!
     email: String!
     phone: String
-    avatar: String
+    avatar: String!
     identity: [String!]
     address: String
   ): User!
@@ -396,13 +398,10 @@ type Mutation {
   createRevenue(host: ID!): Revenue!
   addMoneyToRevenue(host: ID! money: Float!): Revenue!
   withdrawRevenue(host: ID! money: Float!): Revenue!
-<<<<<<< HEAD
   bookmarkOffice(office: ID!): String!
   unBookmarkOffice(office: ID!): String!
-=======
   acceptPayoutPending(host: ID!): PayoutPending!
   createPayoutPending(host: ID! money: Float!): PayoutPending!
->>>>>>> 009dd0b26d69fdf283fb00f0abe7a6a858818eec
 }
 input BookedScheduleInput {
   office: ID!

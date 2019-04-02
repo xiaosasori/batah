@@ -3,11 +3,8 @@ const {
   createToken,
   getUserId,
   formatSearch,
-<<<<<<< HEAD
-  addViewsView, addViewsBooking, addMoneyToRevenue, getAvailableSchedule
-=======
-  addViewsView, addViewsBooking, addMoneyToRevenue, createRevenue
->>>>>>> 009dd0b26d69fdf283fb00f0abe7a6a858818eec
+  addViewsView, addViewsBooking, addMoneyToRevenue, getAvailableSchedule,
+  createRevenue
 } = require('../utils')
 const bcryptjs = require('bcryptjs')
 const { OAuth2Client } = require('google-auth-library')
@@ -71,14 +68,15 @@ const guestResolver = {
       }, {
         path: 'reviews'
       }])
+      console.log('found: ',foundOffices.length)
       let scheduleByOffice = null; //schedule of a office
         let result = [];
         for (office of foundOffices) { //loop over all founded offices
           // create a copy of office
-          let { id, title,category, address, description, shortDescription,numSeats, pictures,
-            tags,amenities,status,reviews,size, pricing, location} = office
-          let tmp = {id, title, category,address, description, shortDescription,numSeats, 
-            pictures,tags,amenities,reviews,size, status,pricing, location}
+          let { id, title,category, address, shortDescription,numSeats, pictures,
+            tags,status,reviews,size, pricing, location} = office
+          let tmp = {id, title, category,address, shortDescription,numSeats, 
+            pictures,tags,reviews,size, status,pricing, location}
 
           let daysResult = [] // available days array of current office
           scheduleByOffice  = await getAvailableSchedule(office._id)
@@ -89,7 +87,7 @@ const guestResolver = {
           result.push(tmp) // add tmp office to result
           // console.log(office.daysAvailable)
         }
-        console.log(result)
+        console.log('res length: ',result.length)
         return result
     },
     async searchOfficeByFilter(_, { id, minSize, maxSize, minNumSeats, maxNumSeats, minPrice, maxPrice, amenities }, { Office, Pricing }) {
@@ -266,6 +264,19 @@ const guestResolver = {
       }
       return canReview
     },
+    async getBookmarks(_,{},{req, User}){
+      const userId = getUserId(req,false)
+      let officesBookmarked = await User.findById(userId).populate({
+        path: 'bookmarks',
+        model: 'Office',
+        select: 'title address pictures',
+        populate: {
+          path: 'reviews',
+          model: 'Review',
+        }
+      }).select('bookmarks')
+      return officesBookmarked.bookmarks
+    }
   },
   Mutation: {
     async signup(_, { email, password, firstName, lastName }, { User }) {

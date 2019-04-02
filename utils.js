@@ -3,12 +3,9 @@ const bcrypt = require('bcryptjs');
 const moment = require('moment-timezone');
 const Views = require('./models/Views')
 const Revenue = require('./models/Revenue')
-<<<<<<< HEAD
 const AvailableSchedule = require('./models/AvailableSchedule')
 const BookedSchedule = require('./models/BookedSchedule')
-=======
 const PayoutPending = require('./models/PayoutPending')
->>>>>>> 009dd0b26d69fdf283fb00f0abe7a6a858818eec
 
 const createToken = (user, expiresIn) => {
   const { _id: userId, email } = user;
@@ -93,7 +90,6 @@ const addMoneyToRevenue = async ({host,total,withdrawable}) => {
     }, { new: true })
 }
 
-<<<<<<< HEAD
 const getAvailableSchedule = async(office) => {
   // get current AvailableSchedule
   console.log("Function: getAvailableSchedule");
@@ -132,10 +128,6 @@ const getAvailableSchedule = async(office) => {
   // console.log("AvailableSchedule result: "+currentAvailableSchedule)
   return currentAvailableSchedule
 }
-
-module.exports = { createToken, getUserId, hashPassword, getDaysLeftInMonth, formatSearch,
-  addViewsView, addViewsBooking, addMoneyToRevenue, getAvailableSchedule};
-=======
 const createRevenue = async({ host }) => {
   const newRevenue = await new Revenue({
     host,
@@ -154,8 +146,8 @@ const createPayoutPending = async ({ host, money }) => {
 }
 
 module.exports = { createToken, getUserId, hashPassword, getDaysLeftInMonth, formatSearch,
-  addViewsView, addViewsBooking, addMoneyToRevenue, createRevenue, createPayoutPending};
->>>>>>> 009dd0b26d69fdf283fb00f0abe7a6a858818eec
+  addViewsView, addViewsBooking, addMoneyToRevenue, getAvailableSchedule,createRevenue, createPayoutPending};
+
 // let a = new Date()
 // a.setHours(0,0,0,0)
 // let b = new Date(a.getFullYear(), a.getMonth(), a.getDate()+1)
