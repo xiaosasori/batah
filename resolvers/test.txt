@@ -93,4 +93,8 @@ mutation {
     status
     money
   }
+  acceptOfficeStatus(office: "5c999a17c54a9e3df2dc4d34"){
+    id
+    status
+  }
 }

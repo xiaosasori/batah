@@ -14,6 +14,15 @@ const adminResolver = {
           status: "paid"
         }, { new: true })
       return currentPayoutPending
+    },
+    async acceptOfficeStatus(_, { office }, { Office }) {
+      const currentOffice = await Office.findOneAndUpdate({
+        _id: office,
+        status: "pending"
+      }, {
+          status: "approve"
+        }, { new: true })
+      return currentOffice
     }
   }
 }
