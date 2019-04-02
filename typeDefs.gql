@@ -18,6 +18,8 @@ type User {
   userType: String
   identity: [String!]
   role: String
+  address: String
+  bookmarks: [String!]
 }
 
 type Office {
@@ -113,6 +115,7 @@ type Review {
   checkIn: Int!
   office: Office!
   user: User!
+  pictures: [String!]
 }
 
 type AvailableSchedule {
@@ -230,7 +233,7 @@ type Query {
   me: User!
   getCurrentUser: User
   searchLocation(address: String!, lat: Int!, lng: Int!): [Location!]
-  searchOffice(searchTerm: String, area: AreaInput, category: String!): [Office!]
+  searchOffice(searchTerm: String, area: AreaInput, category: String!): [searchOfficesPayload!]
   getOffices: [Office!] 
   getOffice(id: String!): Office!
   searchOfficeByFilter(id: [ID!]!, minSize: Int, maxSize: Int, minNumSeats: Int, maxNumSeats: Int, minPrice: Int, maxPice: Int, amenities: [String!]): [Office!]
@@ -247,6 +250,24 @@ type Query {
   canReview(office: ID!): Boolean!
 }
 
+type searchOfficesPayload {
+  id: ID!
+  availableSchedule: [String!]
+  title: String!
+  address: String!
+  category: String!
+  shortDescription: String!
+  description: String!
+  size: Int!
+  numSeats: Int!
+  reviews: [Review!]
+  amenities: [String!]!
+  pricing: Pricing!
+  location: Location!
+  pictures: [String!]!
+  tags: [String!]!
+  status: String
+}
 
 type Subscription {
   notification: Notification!
@@ -290,6 +311,7 @@ type Mutation {
     phone: String
     avatar: String
     identity: [String!]
+    address: String
   ): User!
   createList(
     city: String!
@@ -316,7 +338,8 @@ type Mutation {
     accuracy: Int!
     location: Int!
     checkIn: Int!
-    office: String!): Review!
+    office: String!
+    pictures: [String!]): Review!
   createBooking(
     bookedSchedules: BookedScheduleInput!
   ): Booking!
@@ -365,6 +388,8 @@ type Mutation {
   createRevenue(host: ID!): Revenue!
   addMoneyToRevenue(host: ID! money: Float!): Revenue!
   withdrawRevenue(host: ID! money: Float!): Revenue!
+  bookmarkOffice(office: ID!): String!
+  unBookmarkOffice(office: ID!): String!
 }
 input BookedScheduleInput {
   office: ID!
