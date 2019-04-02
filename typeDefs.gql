@@ -205,7 +205,7 @@ type PayoutPending {
   createdAt: String!
   host: User!
   money: Float!
-  status: String
+  status: String!
 }
 
 enum CURRENCY {
@@ -257,7 +257,15 @@ type Query {
   getDashboard: DashBoard!
   canReview(office: ID!): Boolean!
   getBookmarks: [Office!]
-  getRevenue: Booking
+  getRevenue: RevenuePayload!
+  getVisitorReviews: [Review!]
+  getUserReviews: [Review!]
+}
+
+type RevenuePayload {
+  revenue: Revenue!
+  bookings: [Booking!]
+  payoutHistorys: [PayoutPending!]
 }
 
 type searchOfficesPayload {
@@ -325,7 +333,7 @@ type Mutation {
   ): User!
   createList(
     city: String!
-    size: Int!,
+    size: Int!
     title: String!
     category: String!
     address: String!

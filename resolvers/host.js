@@ -60,25 +60,50 @@ const hostResolver = {
       console.log("Total price: " + sum)
       return {price: sum};
     },
-    async getRevenue(_, {},{ User,Revenue, Booking, Payment,Office, req }){
+    async getRevenue(_, {},{ User,Revenue, Booking, PayoutPending, req }){
       const userId = getUserId(req)
       let user = await User.findById(userId).populate({
         path: 'offices',
         model: 'Office'
       })
+      // console.log('user',user)
       if(user.role !== 'host') throw new Error('You have no access to this')
-      const revenue = await Revenue.findOne({host: userId}) // {host,total, withdrawable}
+      const revenue = await Revenue.findOne({host: userId}) // {id,host,total, withdrawable}
       let bookings = []
       for(office of user.offices){
         console.log(office._id)
-        let booking = await Booking.find({office:office._id}).populate({
-          path: 'payment', //{payment:{totalPrice}, createdAt}
+        let booking = await Booking.find({office:office._id}).populate([{ //[]
+          path: 'payment', //{id,payment:{totalPrice}, createdAt}
           model: 'Payment',
           select: 'totalPrice'
-        }).select('createdAt')
-        console.log(booking)
+        }, {
+          path: 'office',
+          model: 'Office',
+          select: 'title'
+        }]).select('createdAt')
+        bookings.push(...booking)
       }
+      console.log('booking: ', bookings)
 
+      let payoutHistorys = await PayoutPending.find({host: userId}) // {createdAt,host,money,status}
+      return {
+        revenue,
+        bookings,
+        payoutHistorys
+      }
+    },
+    async getVisitorReviews(_, {},{ User,Review, req }){
+      const userId = getUserId(req)
+      const user = await User.findById(userId).populate({path: 'offices',model:'Office',select:'_id'})
+      if(user.role!=='host') throw new Error('You are not host')
+        const reviews = await Review.find({office: {$in: user.offices}})
+        .populate([
+          {path:'user',model:'User',select: 'firstName lastName avatar'},
+          {path:'office',model:'Office',select: 'title _id'}
+        ])
+        .select('createdAt stars pictures text')
+        console.log(reviews)
+        return reviews
     }
   },
   Mutation: {
@@ -87,12 +112,14 @@ const hostResolver = {
       const newLocation = await new Location(args.location).save();
       const newPricing = await new Pricing(args.pricing).save();
       const newOfficeRules = await new OfficeRules(args.officeRules).save();
+      let searchTitle = formatSearch(args.title)
       const newOffice = {
         ...args,
         officeRules: newOfficeRules._id,
         location: newLocation._id,
         pricing: newPricing._id,
-        host: userId
+        host: userId,
+        searchTitle
       };
 
       const savedOffice = await new Office(newOffice).save();
@@ -132,14 +159,15 @@ const hostResolver = {
       }).save()
       return newViews
     },
-    async withdrawRevenue(_, { host, money }, { Revenue, PayoutPending }) {
-
+    async withdrawRevenue(_, {  money }, { User, Revenue, PayoutPending, req }) {
+      const userId = getUserId(req)
+      const user = await User.findById(userId)
+      if(user.role !== 'host') throw new Error('You cannot withdraw')
       // if admin haven't accept (status = unpaid) the last request => can not withdraw
-      const currentPayoutPending = await PayoutPending.find({host, status: "unpaid"})
-      if(currentPayoutPending!="") {
+      const currentPayoutPending = await PayoutPending.find({host: userId, status: "unpaid"})
+      if(!!currentPayoutPending) {
         return null
       }
-
       // edit Revenue (-withdrawable)
       const currentRevenue = await Revenue.findOneAndUpdate({
         host,

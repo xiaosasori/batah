@@ -207,23 +207,24 @@ const guestResolver = {
       console.log(currentBooking)
       return currentBooking;
     },
-    async getMessages(_,{},{Conversation,Message, req}){
+    async getMessages(_,{},{Conversation, req}){
       const userId = getUserId(req)
       const conversations = await Conversation.find({participants: {$in: [userId]}})
       .populate([{
         path: 'messages',
         populate: {
           path: 'from to',
+          model: 'User',
           select: 'firstName lastName avatar'
         }
       }])
       return conversations
     },
-    async addView(_,{},{Views, Office, Revenue}){
+    async addView(_,{},{User,Views, Office, Revenue}){
       console.log('addView')
-      let offices = await Office.find()
-      for(office of offices){
-        await new Revenue({host: office.host}).save()
+      let users = await User.find()
+      for(user of users){
+        await new Revenue({host: user._id}).save()
       }
       // await Office.update({}, {status: 'pending'}, {multi:true})
       // const offices = await Office.find()
@@ -276,6 +277,15 @@ const guestResolver = {
         }
       }).select('bookmarks')
       return officesBookmarked.bookmarks
+    },
+    async getUserReviews(_,{},{req, Review}){
+      const userId = getUserId(req, false)
+      const reviews = await Review.find({user: userId})
+        .populate([
+          {path:'office',model:'Office',select: 'title _id'}
+        ])
+        .select('createdAt stars pictures text')
+        return reviews
     }
   },
   Mutation: {

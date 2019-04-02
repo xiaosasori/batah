@@ -5,7 +5,7 @@ const adminResolver = {
 
   },
   Mutation: {
-    async acceptPayoutPending(_, { host }, { PayoutPending }) {
+    async acceptPayoutPending(_, { host }, { Revenue, PayoutPending, req }) {
       // in a time, only have 1 PayoutPending for a host (see withdrawRevenue)
       const currentPayoutPending = await PayoutPending.findOneAndUpdate({
         host,
