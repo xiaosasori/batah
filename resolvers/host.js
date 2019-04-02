@@ -1,6 +1,7 @@
 const {
   getUserId,
-  formatSearch
+  formatSearch,
+  createPayoutPending
 } = require('../utils')
 
 const hostResolver = {
@@ -111,13 +112,33 @@ const hostResolver = {
       }).save()
       return newViews
     },
-    async withdrawRevenue(_, { host, money }, { Revenue }) {
-      return await Revenue.findOneAndUpdate({
+    async withdrawRevenue(_, { host, money }, { Revenue, PayoutPending }) {
+
+      // if admin haven't accept (status = unpaid) the last request => can not withdraw
+      const currentPayoutPending = await PayoutPending.find({host, status: "unpaid"})
+      if(currentPayoutPending!="") {
+        return null
+      }
+
+      // edit Revenue (-withdrawable)
+      const currentRevenue = await Revenue.findOneAndUpdate({
         host,
-        withdrawable: { $gte: money }
+        withdrawable: { $gte: money } // if money > withdrawable => can not widthdraw
       }, {
           $inc: { withdrawable: - money }
         }, { new: true })
+
+      // create PayoutPending (for admin accept)
+      await createPayoutPending({ host, money })
+
+      return currentRevenue
+    },
+    async createPayoutPending(_, { host, money }, { PayoutPending }) {
+      const newPayoutPending = await new PayoutPending({
+        host,
+        money
+      }).save()
+      return newPayoutPending
     }
   }
 };

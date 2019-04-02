@@ -3,8 +3,12 @@ const bcrypt = require('bcryptjs');
 const moment = require('moment-timezone');
 const Views = require('./models/Views')
 const Revenue = require('./models/Revenue')
+<<<<<<< HEAD
 const AvailableSchedule = require('./models/AvailableSchedule')
 const BookedSchedule = require('./models/BookedSchedule')
+=======
+const PayoutPending = require('./models/PayoutPending')
+>>>>>>> 009dd0b26d69fdf283fb00f0abe7a6a858818eec
 
 const createToken = (user, expiresIn) => {
   const { _id: userId, email } = user;
@@ -89,6 +93,7 @@ const addMoneyToRevenue = async ({host,total,withdrawable}) => {
     }, { new: true })
 }
 
+<<<<<<< HEAD
 const getAvailableSchedule = async(office) => {
   // get current AvailableSchedule
   console.log("Function: getAvailableSchedule");
@@ -130,6 +135,27 @@ const getAvailableSchedule = async(office) => {
 
 module.exports = { createToken, getUserId, hashPassword, getDaysLeftInMonth, formatSearch,
   addViewsView, addViewsBooking, addMoneyToRevenue, getAvailableSchedule};
+=======
+const createRevenue = async({ host }) => {
+  const newRevenue = await new Revenue({
+    host,
+    total: 0,
+    withdrawable: 0
+  }).save()
+  return newRevenue
+}
+
+const createPayoutPending = async ({ host, money }) => {
+  const newPayoutPending = await new PayoutPending({
+    host,
+    money
+  }).save()
+  return newPayoutPending
+}
+
+module.exports = { createToken, getUserId, hashPassword, getDaysLeftInMonth, formatSearch,
+  addViewsView, addViewsBooking, addMoneyToRevenue, createRevenue, createPayoutPending};
+>>>>>>> 009dd0b26d69fdf283fb00f0abe7a6a858818eec
 // let a = new Date()
 // a.setHours(0,0,0,0)
 // let b = new Date(a.getFullYear(), a.getMonth(), a.getDate()+1)

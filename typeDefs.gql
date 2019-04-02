@@ -200,6 +200,14 @@ type Revenue {
   withdrawable: Float!
 }
 
+type PayoutPending {
+  id: ID!
+  createdAt: String!
+  host: User!
+  money: Float!
+  status: String
+}
+
 enum CURRENCY {
   EUR
   JPY
@@ -388,8 +396,13 @@ type Mutation {
   createRevenue(host: ID!): Revenue!
   addMoneyToRevenue(host: ID! money: Float!): Revenue!
   withdrawRevenue(host: ID! money: Float!): Revenue!
+<<<<<<< HEAD
   bookmarkOffice(office: ID!): String!
   unBookmarkOffice(office: ID!): String!
+=======
+  acceptPayoutPending(host: ID!): PayoutPending!
+  createPayoutPending(host: ID! money: Float!): PayoutPending!
+>>>>>>> 009dd0b26d69fdf283fb00f0abe7a6a858818eec
 }
 input BookedScheduleInput {
   office: ID!
