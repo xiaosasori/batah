@@ -132,7 +132,7 @@ const hostResolver = {
       }).save()
       return newViews
     },
-    async withdrawRevenue(_, { host, money }, { Revenue, PayoutPending }) {
+    async withdrawRevenue(_, { host }, { Revenue, PayoutPending }) {
 
       // if admin haven't accept (status = unpaid) the last request => can not withdraw
       const currentPayoutPending = await PayoutPending.find({host, status: "unpaid"})
@@ -140,10 +140,13 @@ const hostResolver = {
         return null
       }
 
+      const revenueWithdraw = await Revenue.findOne({host})
+      const money = revenueWithdraw.withdrawable
+      console.log("money", money)
+      if(money==0) return null // canot withdraw if money = 0
       // edit Revenue (-withdrawable)
       const currentRevenue = await Revenue.findOneAndUpdate({
-        host,
-        withdrawable: { $gte: money } // if money > withdrawable => can not widthdraw
+        host
       }, {
           $inc: { withdrawable: - money }
         }, { new: true })
