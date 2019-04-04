@@ -105,7 +105,8 @@ const PlaceSchema = new mongoose.Schema({
         ref: 'AvailableSchedule'
     },
     status: {
-        type: String //pending approve deactive
+        type: String, //pending approve deactive,
+        default:'pending'
     }
 })
 module.exports = mongoose.model('Office', PlaceSchema)

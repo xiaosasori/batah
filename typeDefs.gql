@@ -260,12 +260,27 @@ type Query {
   getRevenue: RevenuePayload!
   getVisitorReviews: [Review!]
   getUserReviews: [Review!]
+  getOfficeByStatus: OfficeByStatusPayload!
+  getAdminRevenue: AdminRevenuePayload!
+}
+
+type AdminRevenuePayload {
+  revenue: [Revenue!],
+        total: Float!,
+        bookings: Int!,
+        payouts: [PayoutPending!]
+}
+
+type OfficeByStatusPayload {
+  active: [Office!]
+  pending: [Office!]
+  deactive: [Office!]
 }
 
 type RevenuePayload {
   revenue: Revenue!
   bookings: [Booking!]
-  payoutHistorys: [PayoutPending!]
+  payoutHistories: [PayoutPending!]
 }
 
 type searchOfficesPayload {
@@ -313,6 +328,8 @@ input BoundInput{
 }
 
 type Mutation {
+  setPassword(password: String! confirmPassword: String!): User!
+  changePassword(currentPassword: String! password: String! confirmPassword: String!): User!
   signup(
     email: String!
     password: String!
@@ -405,13 +422,21 @@ type Mutation {
   addViewsView(office: ID!): Views!
   createRevenue(host: ID!): Revenue!
   addMoneyToRevenue(host: ID! money: Float!): Revenue!
-  withdrawRevenue(host: ID!): Revenue!
+  withdrawRevenue: WithdrawRevenuePayload!
   bookmarkOffice(office: ID!): String!
   unBookmarkOffice(office: ID!): String!
   acceptPayoutPending(host: ID!): PayoutPending!
   createPayoutPending(host: ID! money: Float!): PayoutPending!
   acceptOfficeStatus(office: ID!): Office!
+  approveOffice(office: ID!): Office
+  rejectOffice(office: ID!): Office
 }
+
+type WithdrawRevenuePayload {
+  revenue: Revenue!
+  payout: PayoutPending!
+}
+
 input BookedScheduleInput {
   office: ID!
     date: String!

@@ -85,11 +85,11 @@ const hostResolver = {
       }
       console.log('booking: ', bookings)
 
-      let payoutHistorys = await PayoutPending.find({host: userId}) // {createdAt,host,money,status}
+      let payoutHistories = await PayoutPending.find({host: userId}) // {createdAt,host,money,status}
       return {
         revenue,
         bookings,
-        payoutHistorys
+        payoutHistories
       }
     },
     async getVisitorReviews(_, {},{ User,Review, req }){
@@ -159,29 +159,31 @@ const hostResolver = {
       }).save()
       return newViews
     },
-    async withdrawRevenue(_, { host }, { Revenue, PayoutPending }) {
-
+    async withdrawRevenue(_, { }, { Revenue, PayoutPending, req }) {
+      console.log('withdraw')
+      const userId = getUserId(req)
       // if admin haven't accept (status = unpaid) the last request => can not withdraw
       const currentPayoutPending = await PayoutPending.find({host: userId, status: "unpaid"})
-      if(!!currentPayoutPending) {
+      if(!currentPayoutPending) {
         return null
       }
 
-      const revenueWithdraw = await Revenue.findOne({host})
+      const revenueWithdraw = await Revenue.findOne({host: userId})
       const money = revenueWithdraw.withdrawable
       console.log("money", money)
       if(money==0) return null // canot withdraw if money = 0
       // edit Revenue (-withdrawable)
       const currentRevenue = await Revenue.findOneAndUpdate({
-        host
+        host: userId
       }, {
           $inc: { withdrawable: - money }
         }, { new: true })
 
       // create PayoutPending (for admin accept)
-      await createPayoutPending({ host, money })
-
-      return currentRevenue
+      const newPayout = await createPayoutPending({ host: userId, money })
+        let res = {revenue: currentRevenue, payout: newPayout}
+        console.log(res)
+      return res
     },
     async createPayoutPending(_, { host, money }, { PayoutPending }) {
       const newPayoutPending = await new PayoutPending({

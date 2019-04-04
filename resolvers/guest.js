@@ -38,8 +38,7 @@ const guestResolver = {
     },
     async searchOffice(_, { searchTerm, area, category }, { Office, Location }) {
       console.log("Function: searchOffice")
-      const condition = {}
-
+      const condition = {status: 'active'}
       // searchTitle
       
       console.log("searchTerm: " + searchTerm)
@@ -209,6 +208,7 @@ const guestResolver = {
     },
     async getMessages(_,{},{Conversation, req}){
       const userId = getUserId(req)
+      console.log('getMessage')
       const conversations = await Conversation.find({participants: {$in: [userId]}})
       .populate([{
         path: 'messages',
@@ -289,6 +289,37 @@ const guestResolver = {
     }
   },
   Mutation: {
+    async setPassword(_, { password, confirmPassword }, { req, User }) {
+      if(password !== confirmPassword) throw new Error('Password and Confirm password are not matched')
+      const userId = getUserId(req)
+      const user = await User.findById(userId)
+
+      if (!user) {
+        throw new Error('User not exist')
+      }
+      const hashedPassword = await hashPassword(password)
+      const newUser = await User.findOneAndUpdate({_id: userId}, {password: hashedPassword, userType:"normal"}, {new: true})
+      // create Revenue
+      return newUser
+    },
+    async changePassword(_, {currentPassword, password, confirmPassword }, { req, User }){
+      if(password !== confirmPassword) throw new Error('Password and Confirm password are not matched')
+
+      const userId = getUserId(req)
+      const user = await User.findById(userId)
+
+      if (!user) {
+        throw new Error('User not exist')
+      }
+      const isValidPassword = await bcryptjs.compare(currentPassword, user.password)
+      if (!isValidPassword) throw new Error('Invalid password')
+      
+      const hashedPassword = await hashPassword(password)
+      const newUser = await User.findOneAndUpdate({_id: userId}, {password: hashedPassword, userType:"normal"}, {new: true})
+      // create Revenue
+      console.log(newUser)
+      return newUser
+    },
     async signup(_, { email, password, firstName, lastName }, { User }) {
       const user = await User.findOne({ email })
       if (user) {
@@ -302,9 +333,6 @@ const guestResolver = {
         email,
         avatar: `http://gravatar.com/avatar/${email}?d=identicon`
       }).save()
-
-      // create Revenue
-      await createRevenue({host: newUser._id})
       
       return {
         user: newUser,
@@ -312,6 +340,7 @@ const guestResolver = {
       }
     },
     async login(_, { email, password }, { User }) {
+      console.log('login')
       const user = await User.findOne({ email })
       if (!user) throw new Error('User not found')
       const isValidPassword = await bcryptjs.compare(password, user.password)
@@ -380,7 +409,7 @@ const guestResolver = {
     async createBooking(_, { bookedSchedules, firstName, lastName, phone, email }, {BookedSchedule, Office,Booking, Payment, req }) {
       const userId = getUserId(req, false)
       let officeId = bookedSchedules.office
-      let office = await Office.findById(officeId).populate('pricing')
+      let office = await Office.findById(officeId).populate('pricing host')
       console.log('office', office.pricing.basePrice)
       let totalPrice = office.pricing.basePrice * bookedSchedules.slots.length
       console.log('totalPrice', totalPrice)
@@ -411,7 +440,8 @@ const guestResolver = {
       // add Revenue
       await addMoneyToRevenue({host: office.host, total: totalPrice - serviceFee, withdrawable: totalPrice - serviceFee})
 
-      return newBooking
+      return {id: newBooking._id, office, createdAt: newBooking.createdAt,
+        bookedSchedules:newBookedSchedule, payment: {totalPrice}}
     },
     async createBookedSchedule(_, { office, date, slots }, { BookedSchedule }) {
       const newBookedSchedule = await new BookedSchedule({
@@ -456,10 +486,10 @@ const guestResolver = {
       return newCreditCardInformation
     },
     async createMessage(_, { to, content}, {req, User, Message, Conversation}){
+      console.log('createMessage')
       const userId = getUserId(req)
-      try{
-        await User.findById(to)
-      }catch(err){ throw new Error('User not exist')}
+      let receiver = await User.findById(to)
+      if(!receiver) throw new Error('Cannot send message to this receiver')
       const newMessage = await new Message({from: userId, to, content}).save()
       let convo = await Conversation.findOne({participants: {$all: [userId, to]}})
       if(convo) await Conversation.updateOne({_id: convo._id},{$push: {messages: {$each: [newMessage._id]}}})
@@ -468,6 +498,7 @@ const guestResolver = {
     },
     async updateMessage(_, { id}, {req, Message}){
       const userId = getUserId(req)
+      console.log('updateMessage')
       return await Message.findOneAndUpdate({_id:id},{readAt: new Date()}, { new: true })
     },
     async addViewsBooking(_, {office}, {Views}){
