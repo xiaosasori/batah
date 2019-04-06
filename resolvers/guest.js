@@ -206,6 +206,25 @@ const guestResolver = {
       console.log(currentBooking)
       return currentBooking;
     },
+    async getInvoice(_,{bookingId}, {Booking}){
+      const booking = await Booking.findById(bookingId)
+      .populate([{
+        path: 'payment',
+        select: 'totalPrice'
+      }, {
+        path: 'office',
+        select: 'id title pictures address',
+        populate: {
+          path: 'host',
+          select: 'firstName lastName email phone'
+        }
+      }, {
+        path: 'bookedSchedules',
+        select: 'date slots'
+      }])
+      if(!booking) throw new Error('Invoice not exist')
+      return booking
+    },
     async getMessages(_,{},{User, Conversation, req}){
       const userId = getUserId(req)
       console.log('getMessage')
@@ -232,15 +251,20 @@ const guestResolver = {
       // console.log(conversations)
       return res
     },
-    async addView(_,{},{User,Views, Office, Revenue}){
+    async addView(_,{},{User,Views, Office, Revenue, Booking}){
       /** fix host to guest*/
       // let a =await User.update({}, {role: 'guest'}, {multi:true}).where('offices').size(0)
       // console.log('user :',a)
-      /** fix revenue */
-      let guests = await User.find({role: 'guest'})
-      for(guest of guests){
-        let a = await Revenue.findOneAndRemove({host: guest._id})
-        console.log(a.host)
+      /** Update booking with name, phone ,email */
+      const bookings = await Booking.find().populate('bookee')
+      for(let booking of bookings){
+        let update = {
+          firstName:booking.bookee.firstName,
+          lastName:booking.bookee.lastName,
+          email:booking.bookee.email
+        }
+        // console.log(`${booking._id} ${booking.bookee.firstName} ${booking.bookee.lastName} ${booking.bookee.email}`)
+        await Booking.updateOne({_id: booking._id},update, {new:true})
       }
       // console.log('addView')
       // let users = await User.find()
@@ -255,15 +279,17 @@ const guestResolver = {
       // //   await new Views({office: o._id}).save()
       // }
     },
-    async getDashboard(_,{},{req,User, Office, Views, Review}){
+    async getDashboard(_,{},{req,User, Office, Views, Notification}){
       const userId = getUserId(req)
       const user = await User.findById(userId)
       const result = {totalViews: 0, totalBooking:0, totalReviews:0}
       if(user.role==='guest') throw new Error('You have no access to this page')
       else if(user.role==='host'){
+        const notifies = await Notification.find({user: userId}).populate('office').sort('-createdAt')
+        result.notifies = notifies
         //get all offices of user 
         // TODO: find where status is active
-        const userOffices = await Office.find({host: user._id}).select('_id reviews')
+        const userOffices = await Office.find({host: user._id, status: 'active'}).select('_id reviews')
         result.activeOffices =  userOffices.length
         for(office of userOffices){
           // add totalView totalBooking
@@ -413,21 +439,25 @@ const guestResolver = {
       )
       return user
     },
-    async createReview(_, {text,cleanliness,accuracy, location, checkIn,office, pictures}, {User, Office, Review,Booking, req}){
+    async createReview(_, {text,cleanliness,accuracy, location, checkIn,office, pictures}, {User, Office,Notification, Review,Booking, req}){
       console.log('createReview')
       const userId = getUserId(req)
-      //need to check if user has booked this
+      const user = await User.findById(userId)
+      //TODO:need to check if user has booked this
       let booking = await Booking.find({bookee: userId, office})
       if(!booking) throw new Error('You cannot leave review to this office')
       const stars= ((cleanliness+accuracy+ location+ checkIn)/4).toFixed(2)
       const newReview =  await new Review({pictures,text,stars,cleanliness,accuracy, location, checkIn,office,user:userId}).save()
-      await Office.findOneAndUpdate({_id: office},{ $push: {reviews:{$each: [newReview._id]}} })
+      const updatedOffice=await Office.findOneAndUpdate({_id: office},{ $push: {reviews:{$each: [newReview._id]}} })
       const result = await Review.findById(newReview._id).populate('user','firstName lastName avatar')
-      // user can only review onece per order
+      //TODO: user can only review onece per order
+      // create notification
+      await new Notification({user:updatedOffice.host, type:'review',
+          office,message:`${user.firstName} ${user.lastName} left a review ${stars} on ${updatedOffice.title}`}).save()
       console.log('result review: ',result)
       return result
     },
-    async createBooking(_, { bookedSchedules, firstName, lastName, phone, email }, {BookedSchedule, Office,Booking, Payment, req }) {
+    async createBooking(_, { bookedSchedules, firstName, lastName, phone, email }, {Notification,BookedSchedule, Office,Booking, Payment, req }) {
       const userId = getUserId(req, false)
       let officeId = bookedSchedules.office
       let office = await Office.findById(officeId).populate('pricing host')
@@ -460,6 +490,8 @@ const guestResolver = {
 
       // add Revenue
       await addMoneyToRevenue({host: office.host, total: totalPrice - serviceFee, withdrawable: totalPrice - serviceFee})
+      await new Notification({user:office.host, type:'booking',
+          office: office._id,message:`${firstName} ${lastName} book slots ${bookedSchedules.slots} on ${bookedSchedules.date} - ${updatedOffice.title}`}).save()
 
       return {id: newBooking._id, office, createdAt: newBooking.createdAt,
         bookedSchedules:newBookedSchedule, payment: {totalPrice}}
@@ -513,7 +545,8 @@ const guestResolver = {
       if(!receiver) throw new Error('Cannot send message to this receiver')
       const newMessage = await new Message({from: userId, to, content}).save()
       let convo = await Conversation.findOne({participants: {$all: [userId, to]}})
-      if(convo) await Conversation.updateOne({_id: convo._id},{createdAt: new Date(),$push: {messages: {$each: [newMessage._id]}}})
+      if(convo) await Conversation.updateOne({_id: convo._id},{read:false,
+        createdAt: new Date(),$push: {messages: {$each: [newMessage._id]}}})
       else await new Conversation({participants: [userId, to], messages:[newMessage._id]}).save()
       return newMessage
     },

@@ -1,24 +1,29 @@
 const mongoose = require('mongoose')
 const NotificationSchema = new mongoose.Schema({
     createdAt: {
-        type: String,
-        required: true
+        type: Date,
+        default: Date.now
     },
     type: {
-        type: String
+        type: String,
+        required: true
     },
     user: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
         required: true
     },
+    office: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Office',
+        required: true
+    },
     link: {
+        type: String
+    },
+    message: {
         type: String,
         required: true
-    },
-    readDate: {
-        type: String,
-        required: true
-    },
+    }
 })
 module.exports = mongoose.model('Notification', NotificationSchema)

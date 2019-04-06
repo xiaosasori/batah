@@ -56,22 +56,30 @@ const adminResolver = {
         }, { new: true })
       return currentPayoutPending
     },
-    async approveOffice(_, {office}, {req, User, Office}){
+    async approveOffice(_, {office}, {req, User, Office, Notification}){
       const userId = getUserId(req)
       const user = await User.findById(userId)
       if(user.role!=='admin') throw new Error('You cannot do this action')
       try{
-        return await Office.findOneAndUpdate({_id: office},{status: 'active'},{new: true})
+        const updatedOffice=await Office.findOneAndUpdate({_id: office},
+          {status: 'active'},{new: true})
+        await new Notification({user:updatedOffice.host, type:'accept',
+          office,message:`Your office ${updatedOffice.title} has been accepted`}).save()
+          return updatedOffice
+
       } catch(err){
         throw new Error('Cannot find office')
       }
     },
-    async rejectOffice(_, {office}, {req, User, Office}){
+    async rejectOffice(_, {office}, {req, User, Office, Notification}){
       const userId = getUserId(req)
       const user = await User.findById(userId)
       if(user.role!=='admin') throw new Error('You cannot do this action')
       try{
-        return await Office.findOneAndUpdate({_id: office},{status: 'deactive'},{new: true})
+        const updatedOffice = await Office.findOneAndUpdate({_id: office},{status: 'deactive'},{new: true})
+        await new Notification({user:updatedOffice.host,type:'accept',
+          office,message:`Your office ${updatedOffice.title} has been rejected`}).save()
+          return updatedOffice
       } catch(err){
         throw new Error('Cannot find office')
       }

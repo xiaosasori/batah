@@ -13,7 +13,6 @@ type User {
   paymentAccount: [PaymentAccount!]!
   sentMessages: [Message!]!
   receivedMessages: [Message!]!
-  notifications: [Notification!]!
   avatar: String!
   userType: String
   identity: [String!]
@@ -139,6 +138,9 @@ type Booking {
   office: Office!
   bookedSchedules: BookedSchedule!
   payment: Payment!
+  firstName:String!
+  lastName: String!
+  email: String!
 }
 
 type Payment {
@@ -189,7 +191,7 @@ type Notification {
   createdAt: String!
   type: String!
   user: User!
-  content: String!
+  message: String!
   office: Office!
 }
 
@@ -251,6 +253,7 @@ type Query {
   getNumOffice: [Int!]!
   getAvailableSchedule(office: ID!, startDate: String, endDate: String): [AvailableSchedule!]
   getBookedSchedule(office: ID!, startDate: String, endDate: String): [BookedSchedule!]
+  getInvoice(bookingId: String!): Booking
   getBookingByGuest: [Booking!]
   getBookingByHost: [Booking!]
   getTotalPrice(office: ID): Price!
@@ -314,6 +317,7 @@ type DashBoard {
   totalViews: Int!
   totalBooking: Int!
   totalReviews: Int!
+  notifies: [Notification!]
 }
 
 type Price{

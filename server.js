@@ -19,6 +19,7 @@ const Conversation = require('./models/Conversation')
 const Message = require('./models/Message')
 const Views = require('./models/Views')
 const Revenue = require('./models/Revenue')
+const Notification = require('./models/Notification')
 const PayoutPending = require('./models/PayoutPending')
 
 // import models
@@ -65,6 +66,7 @@ const server = new ApolloServer({
       Views,
       Revenue,
       PayoutPending,
+      Notification,
       req,
       pubsub
     }

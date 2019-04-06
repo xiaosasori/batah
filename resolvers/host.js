@@ -60,7 +60,8 @@ const hostResolver = {
       console.log("Total price: " + sum)
       return {price: sum};
     },
-    async getRevenue(_, {},{ User,Revenue, Booking, PayoutPending, req }){
+    async getRevenue(_, {},{  User,Revenue, Booking, PayoutPending, req }){
+      console.log('getRevenue')
       const userId = getUserId(req)
       let user = await User.findById(userId).populate({
         path: 'offices',
@@ -71,7 +72,6 @@ const hostResolver = {
       const revenue = await Revenue.findOne({host: userId}) // {id,host,total, withdrawable}
       let bookings = []
       for(office of user.offices){
-        console.log(office._id)
         let booking = await Booking.find({office:office._id}).populate([{ //[]
           path: 'payment', //{id,payment:{totalPrice}, createdAt}
           model: 'Payment',
@@ -83,9 +83,8 @@ const hostResolver = {
         }]).select('createdAt')
         bookings.push(...booking)
       }
-      console.log('booking: ', bookings)
-
-      let payoutHistories = await PayoutPending.find({host: userId}) // {createdAt,host,money,status}
+      // console.log('booking: ', bookings)
+      let payoutHistories = await PayoutPending.find({host: userId}).sort('-createdAt') // {createdAt,host,money,status}
       return {
         revenue,
         bookings,
@@ -191,7 +190,13 @@ const hostResolver = {
         money
       }).save()
       return newPayoutPending
-    }
+    },
+    // async createAcceptNotification(_, {officeId, officeName, message},{req,User,Notification}) {
+    //     const userId = getUserId(req)
+    //     const user = await User.findById(userId)
+    //     if(user.role!=='admin') throw new Error('Your are not authorized')
+    //     const newNotify = await new Notification({})
+    // }
   }
 };
 

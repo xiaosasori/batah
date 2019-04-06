@@ -154,3 +154,7 @@ module.exports = { createToken, getUserId, hashPassword, getDaysLeftInMonth, for
 // // let b = new Date(new Date(a.getTime()+ (24 * 60 * 60 * 1000)).setHours(0,0,0,0))
 // console.log(a.getDate()+ ' '+a.getHours())
       // console.log(b.getDate()+' '+b.getHours())
+// let a = 'www Nguyen Minh left a review 2.50 on Phúc Quý Office'
+// let index = a.indexOf('left a review') + 14
+//       let b= a.slice(index+8)
+//       console.log(b)
