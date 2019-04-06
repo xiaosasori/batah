@@ -28,23 +28,31 @@ const adminResolver = {
         path: 'host',
         model: 'User',
         select: 'firstName lastName id avatar'
-      })
+      }).sort('-createdAt')
+      let paid =await PayoutPending.aggregate([{$match: {status: 'paid'}},{$group: {_id:null,sum:{$sum: "$money"}}}])
+      console.log('paid',paid)
       return {
         revenue,
         total,
         bookings,
-        payouts
+        payouts,
+        balance: paid.length>0?paid[0].sum : 0
       }
     }
   },
   Mutation: {
-    async acceptPayoutPending(_, { host }, { Revenue, PayoutPending, req }) {
+    async acceptPayoutPending(_, { payoutId }, { User, PayoutPending, req }) {
+      const userId = getUserId(req)
+      const user = await User.findById(userId)
+      if(!user) throw new Error('User not exist')
+      if(user.role!=='admin') throw new Error('Not authorized!')
       // in a time, only have 1 PayoutPending for a host (see withdrawRevenue)
       const currentPayoutPending = await PayoutPending.findOneAndUpdate({
-        host,
+        _id: payoutId,
         status: "unpaid"
       }, {
-          status: "paid"
+          status: "paid",
+          createdAt: new Date()
         }, { new: true })
       return currentPayoutPending
     },

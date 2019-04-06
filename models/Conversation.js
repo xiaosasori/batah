@@ -4,6 +4,10 @@ const ConversationSchema = new mongoose.Schema({
         type: Date,
         default: Date.now
     },
+    read: {
+        type: Boolean,
+        default: false
+    },
     participants: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',

@@ -206,7 +206,7 @@ const guestResolver = {
       console.log(currentBooking)
       return currentBooking;
     },
-    async getMessages(_,{},{Conversation, req}){
+    async getMessages(_,{},{User, Conversation, req}){
       const userId = getUserId(req)
       console.log('getMessage')
       const conversations = await Conversation.find({participants: {$in: [userId]}})
@@ -217,15 +217,36 @@ const guestResolver = {
           model: 'User',
           select: 'firstName lastName avatar'
         }
-      }])
-      return conversations
+      }]).sort('-createdAt')
+      let res = []
+      let tmp = {}
+      for(let i of conversations){
+        i.participants.splice(i.participants.indexOf(userId),1)
+        // console.log(i.participants[0])
+        i.withPerson = await User.findById(i.participants[0]).select('id firstName lastName avatar')
+        tmp ={messages: i.messages, withPerson: i.withPerson, createdAt: i.createdAt,id: i._id,read:i.read}
+        // console.log(tmp)
+        res.push(tmp)
+        // console.log(i.withPerson)
+      }
+      // console.log(conversations)
+      return res
     },
     async addView(_,{},{User,Views, Office, Revenue}){
-      console.log('addView')
-      let users = await User.find()
-      for(user of users){
-        await new Revenue({host: user._id}).save()
+      /** fix host to guest*/
+      // let a =await User.update({}, {role: 'guest'}, {multi:true}).where('offices').size(0)
+      // console.log('user :',a)
+      /** fix revenue */
+      let guests = await User.find({role: 'guest'})
+      for(guest of guests){
+        let a = await Revenue.findOneAndRemove({host: guest._id})
+        console.log(a.host)
       }
+      // console.log('addView')
+      // let users = await User.find()
+      // for(user of users){
+      //   await new Revenue({host: user._id}).save()
+      // }
       // await Office.update({}, {status: 'pending'}, {multi:true})
       // const offices = await Office.find()
       // for(o of offices){
@@ -492,14 +513,14 @@ const guestResolver = {
       if(!receiver) throw new Error('Cannot send message to this receiver')
       const newMessage = await new Message({from: userId, to, content}).save()
       let convo = await Conversation.findOne({participants: {$all: [userId, to]}})
-      if(convo) await Conversation.updateOne({_id: convo._id},{$push: {messages: {$each: [newMessage._id]}}})
+      if(convo) await Conversation.updateOne({_id: convo._id},{createdAt: new Date(),$push: {messages: {$each: [newMessage._id]}}})
       else await new Conversation({participants: [userId, to], messages:[newMessage._id]}).save()
       return newMessage
     },
-    async updateMessage(_, { id}, {req, Message}){
+    async updateMessage(_, { id}, {req, Conversation, Message}){
       const userId = getUserId(req)
       console.log('updateMessage')
-      return await Message.findOneAndUpdate({_id:id},{readAt: new Date()}, { new: true })
+      return await Conversation.findOneAndUpdate({_id:id},{read: true}, { new: true })
     },
     async addViewsBooking(_, {office}, {Views}){
       return Views.findOneAndUpdate({office}, {$inc: {numBooking: 1}},{new: true});

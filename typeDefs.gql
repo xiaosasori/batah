@@ -233,8 +233,10 @@ enum NOTIFICATION_TYPE {
 }
 type Conversation {
   id: ID!
-  participants: [String!]!
+  withPerson: User!
   messages: [Message!]!
+  createdAt: String!
+  read: Boolean!
 }
 
 type Query {
@@ -269,6 +271,7 @@ type AdminRevenuePayload {
         total: Float!,
         bookings: Int!,
         payouts: [PayoutPending!]
+        balance: Float!
 }
 
 type OfficeByStatusPayload {
@@ -425,7 +428,7 @@ type Mutation {
   withdrawRevenue: WithdrawRevenuePayload!
   bookmarkOffice(office: ID!): String!
   unBookmarkOffice(office: ID!): String!
-  acceptPayoutPending(host: ID!): PayoutPending!
+  acceptPayoutPending(payoutId: ID!): PayoutPending!
   createPayoutPending(host: ID! money: Float!): PayoutPending!
   acceptOfficeStatus(office: ID!): Office!
   approveOffice(office: ID!): Office
