@@ -211,7 +211,7 @@ const guestResolver = {
       }, {
         path: 'bookedSchedules',
         select: 'date slots'
-      }])
+      }]).sort('-createdAt')
       console.log(currentBooking)
       return currentBooking;
     },
@@ -469,10 +469,12 @@ const guestResolver = {
       console.log('result review: ',result)
       return result
     },
-    async createBooking(_, { bookedSchedules }, {Notification,BookedSchedule, Office,Booking, Payment, req }) {
+    async createBooking(_, { bookedSchedules }, {User,Notification,BookedSchedule, Office,Booking, Payment, req }) {
       console.log('createBooking')
       const userId = getUserId(req, false)
-      const {firstName, lastName, email, phone} = bookedSchedules
+      if(userId) const user = await User.findById(userId)
+      if(!user.identity) await User.updateOne({_id:userId}, {identity})
+      const {firstName, lastName, email, phone, identity} = bookedSchedules
       let officeId = bookedSchedules.office
       let office = await Office.findById(officeId).populate('pricing host')
       // console.log('office', office.pricing.basePrice)
@@ -497,7 +499,8 @@ const guestResolver = {
         bookee: userId,
         office:officeId,
         bookedSchedules: newBookedSchedule._id,
-        payment: payment._id
+        payment: payment._id,
+        identity
       }).save()
 
       // add View Booking
@@ -557,6 +560,7 @@ const guestResolver = {
     async createMessage(_, { to, content}, {req, User, Message, Conversation}){
       console.log('createMessage')
       const userId = getUserId(req)
+      if(userId === to) throw new Error('Cannot send message')
       let receiver = await User.findById(to)
       if(!receiver) throw new Error('Cannot send message to this receiver')
       const newMessage = await new Message({from: userId, to, content}).save()

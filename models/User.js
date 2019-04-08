@@ -52,6 +52,9 @@ const UserSchema = new mongoose.Schema({
     bookmarks: {
         type: [mongoose.Schema.Types.ObjectId],
         ref: 'Office'
+    },
+    paypal: {
+        type: String
     }
 })
 

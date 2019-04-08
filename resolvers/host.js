@@ -211,15 +211,15 @@ const hostResolver = {
       }).save()
       return newViews
     },
-    async withdrawRevenue(_, { }, { Revenue, PayoutPending, req }) {
+    async withdrawRevenue(_, { paypal }, { User, Revenue, PayoutPending, req }) {
       console.log('withdraw')
       const userId = getUserId(req)
       // if admin haven't accept (status = unpaid) the last request => can not withdraw
       const currentPayoutPending = await PayoutPending.find({host: userId, status: "unpaid"})
-      if(!currentPayoutPending) {
+      if(currentPayoutPending) {
         return null
       }
-
+      if(paypal) await User.updateOne({_id: userId}, {paypal})
       const revenueWithdraw = await Revenue.findOne({host: userId})
       const money = revenueWithdraw.withdrawable
       console.log("money", money)

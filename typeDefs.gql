@@ -19,6 +19,7 @@ type User {
   role: String
   address: String
   bookmarks: [String!]
+  paypal: String
 }
 
 type Office {
@@ -142,6 +143,7 @@ type Booking {
   lastName: String!
   email: String!
   phone: String!
+  identity: [String!]!
 }
 
 type Payment {
@@ -474,6 +476,7 @@ input BookedScheduleInput {
     date: String!
     slots: [Int!]!
     firstName: String! lastName: String! email:String! phone:String!
+    identity: [String!]!
 }
 input ScheduleInput {
     date: String!
