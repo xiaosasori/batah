@@ -12,11 +12,11 @@ const hostResolver = {
       return res
     },
     /* host can not edit booked schedule */
-    async getBookedSchedule(_, {office, startDate, endDate},{ BookedSchedule }){
+    async getBookedSchedule(_, {office},{ BookedSchedule }){
       console.log("Function: getBookedSchedule");
       const currentBookedSchedule = await BookedSchedule.find({
         office,
-        date: {$gte: new Date(startDate),  $lte: new Date(endDate) }
+        date: {$gte: new Date()}
       })
       return currentBookedSchedule;
     },
@@ -85,6 +85,7 @@ const hostResolver = {
       }
       // console.log('booking: ', bookings)
       let payoutHistories = await PayoutPending.find({host: userId}).sort('-createdAt') // {createdAt,host,money,status}
+      bookings = bookings.sort((a,b)=> a.createdAt < b.createdAt)
       return {
         revenue,
         bookings,
@@ -132,6 +133,58 @@ const hostResolver = {
       );
       await new Views({office: savedOffice._id}).save()
       return savedOffice;
+    },
+    async updateOffice(_, args, { User, Office, Location, Pricing, OfficeRules, req }) {
+      const userId = getUserId(req);
+      const user = await User.findById(userId)
+      if(!user || user.role!=='host') throw new Error('Not authorized')
+      const officeToUpdate = await Office.findOne({_id: args.officeId})
+      if(!officeToUpdate) throw new Error('Office not found')
+      console.log('updateOffice')
+      await Location.deleteOne({_id: officeToUpdate.location})
+      await Pricing.deleteOne({_id: officeToUpdate.pricing})
+      await OfficeRules.deleteOne({_id: officeToUpdate.officeRules})
+      const newLocation = await new Location(args.location).save();
+      const newPricing = await new Pricing(args.pricing).save();
+      const newOfficeRules = await new OfficeRules(args.officeRules).save();
+      let searchTitle = formatSearch(args.title)
+      const newOffice = {
+        ...args,
+        officeRules: newOfficeRules._id,
+        location: newLocation._id,
+        pricing: newPricing._id,
+        host: userId,
+        searchTitle
+      };
+
+      const savedOffice = await Office.findOneAndUpdate({_id: args.officeId},newOffice, {new:true} )
+      return savedOffice;
+    },
+    async updateOfficeImages(_, args, { User, Office, req }) {
+      const userId = getUserId(req);
+      const user = await User.findById(userId)
+      if(!user || user.role!=='host') throw new Error('Not authorized')
+      const officeToUpdate = await Office.findOne({_id: args.officeId})
+      if(!officeToUpdate) throw new Error('Office not found')
+      console.log('updateOfficeImages')
+
+      const savedOffice = await Office.findOneAndUpdate({_id: args.officeId},{pictures:args.pictures}, {new:true} )
+      return savedOffice;
+    },
+    async updateOfficeSchedule(_, args, { User, AvailableSchedule, Office, req }){
+      const userId = getUserId(req);
+      const user = await User.findById(userId)
+      if(!user || user.role!=='host') throw new Error('Not authorized')
+      const officeToUpdate = await Office.findOne({_id: args.officeId})
+      if(!officeToUpdate) throw new Error('Office not found')
+      console.log('updateOfficeSchedule')
+      try{
+        await AvailableSchedule.deleteMany({office: args.officeId})
+        args.schedule.forEach(async el => await new AvailableSchedule({...el,office: args.officeId}).save())
+        return true
+      }catch{
+        return false
+      }
     },
     async createAvailableSchedule(_, { office, date, slots }, { AvailableSchedule }) {
       const newAvailableSchedule = await new AvailableSchedule({

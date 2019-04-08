@@ -16,8 +16,9 @@ const guestResolver = {
       const userId = getUserId(req)
       return await User.findById(userId)
     },
-    async getOffice(_, args, {Office, Booking, req}){
-      const office = await Office.findOne({_id: args.id}).populate([{
+    async getOffice(_, args, {Office}){
+      console.log('getOffice')
+      const office = await Office.findById(args.id).populate([{
         path: 'pricing'
       },{
         path: 'location'
@@ -33,10 +34,9 @@ const guestResolver = {
         }
       }])
       await addViewsView(office._id)
-
       return office
     },
-    async searchOffice(_, { searchTerm, area, category }, { Office, Location }) {
+    async searchOffice(_, { searchTerm, area, category, page }, { Office, Location }) {
       console.log("Function: searchOffice")
       const condition = {status: 'active'}
       // searchTitle
@@ -58,15 +58,23 @@ const guestResolver = {
       }
 
       // category
-      console.log('category',category)
-      if(category && category!=='all') condition.category = category  
-      let foundOffices = await Office.find(condition).populate([{
+      if(category && category!=='all') condition.category = category 
+      // search
+      let pageSize = 4
+      let pageNum = !!page ? page : 1
+      let foundOffices = await Office.find(condition)
+      .skip(pageSize * (pageNum-1))
+      .limit(pageSize)
+      .populate([{
         path: 'pricing'
       },{
         path: 'location'
       }, {
         path: 'reviews'
       }])
+      let totalDocs =  await Office.find(condition).count()
+      console.log('totalDocs',totalDocs)
+      const hasMore = totalDocs > pageSize * pageNum
       console.log('found: ',foundOffices.length)
       let scheduleByOffice = null; //schedule of a office
         let result = [];
@@ -86,8 +94,9 @@ const guestResolver = {
           result.push(tmp) // add tmp office to result
           // console.log(office.daysAvailable)
         }
+
         console.log('res length: ',result.length)
-        return result
+        return {foundOffices: result, hasMore}
     },
     async searchOfficeByFilter(_, { id, minSize, maxSize, minNumSeats, maxNumSeats, minPrice, maxPrice, amenities }, { Office, Pricing }) {
       const condition = {}
@@ -122,7 +131,7 @@ const guestResolver = {
         let foundOffice = await Office.findOne({_id: el.office}).populate({
           path: 'reviews',
           select: 'stars'
-        }).select('id title address pictures ')
+        }).select('id title address pictures status')
         result.push(foundOffice)
       }
       // console.log(result)
@@ -303,10 +312,12 @@ const guestResolver = {
       // console.log('res: ',result)
       return result
     },
-    async canReview(_, {office}, { Booking, req}){
+    async canReview(_, {office}, { Office,Booking, req}){
       let canReview = false
       const userId = getUserId(req, false)
       if(userId) {
+        const isHost = await Office.findOne({host: userId, _id: office})
+        if(isHost) {console.log('isHost');return false;}
         let booking = await Booking.findOne({bookee: userId, office})
         if(booking) canReview = true
       }
@@ -430,11 +441,12 @@ const guestResolver = {
         throw new Error('Invalid token')
       }
     },
-    updateProfile(_, { email, firstName, lastName, phone, identity, avatar }, { User, req }) {
+    updateProfile(_, { email, firstName, lastName, phone, identity, avatar, address }, { User, req }) {
       const userId = getUserId(req)
+      console.log('updateProfile')
       const user = User.findOneAndUpdate(
         { _id: userId },
-        { email, firstName, lastName, phone, identity, avatar },
+        { email, firstName, lastName, phone, identity, avatar, address },
         { new: true }
       )
       return user
@@ -457,23 +469,26 @@ const guestResolver = {
       console.log('result review: ',result)
       return result
     },
-    async createBooking(_, { bookedSchedules, firstName, lastName, phone, email }, {Notification,BookedSchedule, Office,Booking, Payment, req }) {
+    async createBooking(_, { bookedSchedules }, {Notification,BookedSchedule, Office,Booking, Payment, req }) {
+      console.log('createBooking')
       const userId = getUserId(req, false)
+      const {firstName, lastName, email, phone} = bookedSchedules
       let officeId = bookedSchedules.office
       let office = await Office.findById(officeId).populate('pricing host')
-      console.log('office', office.pricing.basePrice)
+      // console.log('office', office.pricing.basePrice)
       let totalPrice = office.pricing.basePrice * bookedSchedules.slots.length
-      console.log('totalPrice', totalPrice)
+      // console.log('totalPrice', totalPrice)
       let serviceFee = totalPrice * 0.1
-      console.log('serviceFee', serviceFee)
+      // console.log('serviceFee', serviceFee)
       let paymentMethod = 'paypal'
       const payment = await new Payment({serviceFee, officePrice: office.pricing.basePrice,totalPrice,paymentMethod}).save()
-      console.log('id',payment._id)
+      // console.log('id',payment._id)
       const newBookedSchedule = await new BookedSchedule({
         office: officeId,
         date : new Date(bookedSchedules.date),
         slots: bookedSchedules.slots
       }).save()
+      console.log(`${firstName} ${lastName} ${phone} ${email}`)
       const newBooking = await new Booking({
         firstName,
         lastName,
@@ -491,9 +506,10 @@ const guestResolver = {
       // add Revenue
       await addMoneyToRevenue({host: office.host, total: totalPrice - serviceFee, withdrawable: totalPrice - serviceFee})
       await new Notification({user:office.host, type:'booking',
-          office: office._id,message:`${firstName} ${lastName} book slots ${bookedSchedules.slots} on ${bookedSchedules.date} - ${updatedOffice.title}`}).save()
+          office: office._id,message:
+          `${firstName} ${lastName} book slots ${bookedSchedules.slots} on ${bookedSchedules.date} - ${office.title}`}).save()
 
-      return {id: newBooking._id, office, createdAt: newBooking.createdAt,
+      return {id: newBooking._id, office, createdAt: newBooking.createdAt,firstName,lastName,email,phone,
         bookedSchedules:newBookedSchedule, payment: {totalPrice}}
     },
     async createBookedSchedule(_, { office, date, slots }, { BookedSchedule }) {

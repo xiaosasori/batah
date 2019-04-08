@@ -134,13 +134,14 @@ type BookedSchedule {
 type Booking {
   id: ID!
   createdAt: String!
-  bookee: User!
+  bookee: User
   office: Office!
   bookedSchedules: BookedSchedule!
   payment: Payment!
   firstName:String!
   lastName: String!
   email: String!
+  phone: String!
 }
 
 type Payment {
@@ -244,8 +245,7 @@ type Conversation {
 type Query {
   me: User!
   getCurrentUser: User
-  searchLocation(address: String!, lat: Int!, lng: Int!): [Location!]
-  searchOffice(searchTerm: String, area: AreaInput, category: String!): [searchOfficesPayload!]
+  searchOffice(searchTerm: String, area: AreaInput, category: String! page:Int): searchOfficesPayload!
   getOffices: [Office!] 
   getOffice(id: String!): Office!
   searchOfficeByFilter(id: [ID!]!, minSize: Int, maxSize: Int, minNumSeats: Int, maxNumSeats: Int, minPrice: Int, maxPice: Int, amenities: [String!]): [Office!]
@@ -288,8 +288,7 @@ type RevenuePayload {
   bookings: [Booking!]
   payoutHistories: [PayoutPending!]
 }
-
-type searchOfficesPayload {
+type FoundOffices {
   id: ID!
   availableSchedule: [String!]
   title: String!
@@ -306,6 +305,11 @@ type searchOfficesPayload {
   pictures: [String!]!
   tags: [String!]!
   status: String
+}
+
+type searchOfficesPayload {
+  foundOffices: [FoundOffices!]
+  hasMore: Boolean!
 }
 
 type Subscription {
@@ -352,7 +356,7 @@ type Mutation {
     email: String!
     phone: String
     avatar: String!
-    identity: [String!]
+    identity: [String]
     address: String
   ): User!
   createList(
@@ -375,6 +379,27 @@ type Mutation {
     schedule: [AvailableDays!]!
     pictures: [String!]!
   ): Office!
+  updateOffice(
+    officeId: String!
+    city: String!
+    size: Int!
+    title: String!
+    category: String!
+    address: String!
+    description: String!
+    shortDescription: String!
+    phone: String!
+    website: String
+    email: String
+    amenities: [String!]!
+    numSeats: Int!
+    location: LocationInput!
+    tags: [String!]!
+    pricing: PriceInput!
+    officeRules: RuleInput!
+  ): Office!
+  updateOfficeImages(officeId: String! pictures: [String!]!): Office!
+  updateOfficeSchedule(officeId: String! schedule: [AvailableDays!]!): Boolean!
   createReview(text: String!
     cleanliness: Int!
     accuracy: Int!
@@ -448,6 +473,7 @@ input BookedScheduleInput {
   office: ID!
     date: String!
     slots: [Int!]!
+    firstName: String! lastName: String! email:String! phone:String!
 }
 input ScheduleInput {
     date: String!

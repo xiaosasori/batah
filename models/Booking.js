@@ -7,8 +7,7 @@ const BookingSchema = new mongoose.Schema({
     },
     bookee: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'User',
-        required: true
+        ref: 'User'
     },
     office: {
         type: mongoose.Schema.Types.ObjectId,
@@ -34,6 +33,10 @@ const BookingSchema = new mongoose.Schema({
         required: true
     },
     email: {
+        type: String,
+        required: true
+    },
+    phone: {
         type: String,
         required: true
     }
