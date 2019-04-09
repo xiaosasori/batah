@@ -6,6 +6,8 @@ const {
   addViewsView, addViewsBooking, addMoneyToRevenue, getAvailableSchedule,
   createRevenue
 } = require('../utils')
+const Mailer = require('../services/Mailer')
+const surveyTemplate = require('../services/template/booking')
 const bcryptjs = require('bcryptjs')
 const { OAuth2Client } = require('google-auth-library')
 const CLIENT_ID = '131089285485-c6aep24hbqq39l6ftd5mnjep5495tssc.apps.googleusercontent.com'
@@ -273,16 +275,29 @@ const guestResolver = {
       // let a =await User.update({}, {role: 'guest'}, {multi:true}).where('offices').size(0)
       // console.log('user :',a)
       /** Update booking with name, phone ,email */
-      const bookings = await Booking.find().populate('bookee')
-      for(let booking of bookings){
-        let update = {
-          firstName:booking.bookee.firstName,
-          lastName:booking.bookee.lastName,
-          email:booking.bookee.email
-        }
-        // console.log(`${booking._id} ${booking.bookee.firstName} ${booking.bookee.lastName} ${booking.bookee.email}`)
-        await Booking.updateOne({_id: booking._id},update, {new:true})
-      }
+      // const bookings = await Booking.find().populate('bookee')
+      // for(let booking of bookings){
+      //   let update = {
+      //     firstName:booking.bookee.firstName,
+      //     lastName:booking.bookee.lastName,
+      //     email:booking.bookee.email
+      //   }
+      //   await Booking.updateOne({_id: booking._id},update, {new:true})
+      // }
+      let email = 'xiaosasori@gmail.com'
+      let office = await Office.findById('5ca088184433ea13b4adf847')
+      
+      const order = {
+        title: office.title,redirectDomain:'http://www.batah.space/invoice/5cac0fe40ff43a171c6b8c08',
+        recipients: email.split(',').map(email => ({ email: email.trim() }))
+    }
+
+    const mailer = new Mailer(order, surveyTemplate(order));
+    try {
+        await mailer.send();
+    } catch (err) {
+        console.log(err);
+    }
       // console.log('addView')
       // let users = await User.find()
       // for(user of users){
@@ -545,6 +560,15 @@ const guestResolver = {
       await new Notification({user:office.host, type:'booking',
           office: office._id,message:
           `${firstName} ${lastName} book slots ${bookedSchedules.slots} on ${bookedSchedules.date} - ${office.title}`}).save()
+
+      //send email
+      const order = {
+        title: office.title,
+        redirectDomain:`http://www.batah.space/invoice/${newBooking._id}`,
+        recipients: email.split(',').map(email => ({ email: email.trim() }))
+      }
+      const mailer = new Mailer(order, surveyTemplate(order));
+      await mailer.send();
 
       return {id: newBooking._id, office, createdAt: newBooking.createdAt,firstName,lastName,email,phone,
         bookedSchedules:newBookedSchedule, payment: {totalPrice}, identity}
