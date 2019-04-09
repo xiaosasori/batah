@@ -472,8 +472,10 @@ const guestResolver = {
     async createBooking(_, { bookedSchedules }, {User,Notification,BookedSchedule, Office,Booking, Payment, req }) {
       console.log('createBooking')
       const userId = getUserId(req, false)
-      if(userId) const user = await User.findById(userId)
-      if(!user.identity) await User.updateOne({_id:userId}, {identity})
+      if(userId) {
+        const user = await User.findById(userId)
+        if(!user.identity) await User.updateOne({_id:userId}, {identity})
+      }
       const {firstName, lastName, email, phone, identity} = bookedSchedules
       let officeId = bookedSchedules.office
       let office = await Office.findById(officeId).populate('pricing host')
