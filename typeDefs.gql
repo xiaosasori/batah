@@ -361,6 +361,7 @@ type Mutation {
     identity: [String]
     address: String
   ): User!
+  updateIdentity(identity: [String!]!): User!
   createList(
     city: String!
     size: Int!
@@ -450,6 +451,7 @@ type Mutation {
     country: String!
   ): CreditCardInformation!
   createMessage(to: ID! content: String!): Message!
+  sendAdmin(content: String!): Message!
   updateMessage(id: ID!): Message!
   createViews(office: ID!): Views!
   addViewsBooking(office: ID!): Views!

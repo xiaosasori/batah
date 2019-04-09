@@ -9,7 +9,7 @@ const {
 const bcryptjs = require('bcryptjs')
 const { OAuth2Client } = require('google-auth-library')
 const CLIENT_ID = '131089285485-c6aep24hbqq39l6ftd5mnjep5495tssc.apps.googleusercontent.com'
-
+const moment = require('moment-timezone')
 const guestResolver = {
   Query: {
     async getCurrentUser(_, args, { User, req }) {
@@ -60,7 +60,7 @@ const guestResolver = {
       // category
       if(category && category!=='all') condition.category = category 
       // search
-      let pageSize = 4
+      let pageSize = 6
       let pageNum = !!page ? page : 1
       let foundOffices = await Office.find(condition)
       .skip(pageSize * (pageNum-1))
@@ -75,25 +75,28 @@ const guestResolver = {
       let totalDocs =  await Office.find(condition).count()
       console.log('totalDocs',totalDocs)
       const hasMore = totalDocs > pageSize * pageNum
-      console.log('found: ',foundOffices.length)
       let scheduleByOffice = null; //schedule of a office
-        let result = [];
-        for (office of foundOffices) { //loop over all founded offices
-          // create a copy of office
-          let { id, title,category, address, shortDescription,numSeats, pictures,
-            tags,status,reviews,size, pricing, location} = office
-          let tmp = {id, title, category,address, shortDescription,numSeats, 
-            pictures,tags,reviews,size, status,pricing, location}
+      let result = [];
+      if(foundOffices.length){
 
-          let daysResult = [] // available days array of current office
-          scheduleByOffice  = await getAvailableSchedule(office._id)
-          for(dayAvailable of scheduleByOffice){
-            daysResult.push(dayAvailable.date) //return array of day available
+        console.log('found: ',foundOffices.length)
+          for (office of foundOffices) { //loop over all founded offices
+            // create a copy of office
+            let { id, title,category, address, shortDescription,numSeats, pictures,
+              tags,status,reviews,size, pricing, location} = office
+            let tmp = {id, title, category,address, shortDescription,numSeats, 
+              pictures,tags,reviews,size, status,pricing, location}
+  
+            let daysResult = [] // available days array of current office
+            scheduleByOffice  = await getAvailableSchedule(office._id)
+            for(dayAvailable of scheduleByOffice){
+              daysResult.push(dayAvailable.date) //return array of day available
+            }
+            tmp.availableSchedule = daysResult // assign to tmp office
+            result.push(tmp) // add tmp office to result
+            // console.log(office.daysAvailable)
           }
-          tmp.availableSchedule = daysResult // assign to tmp office
-          result.push(tmp) // add tmp office to result
-          // console.log(office.daysAvailable)
-        }
+      }
 
         console.log('res length: ',result.length)
         return {foundOffices: result, hasMore}
@@ -155,6 +158,7 @@ const guestResolver = {
     async getAvailableSchedule(_, {office, startDate, endDate},{ AvailableSchedule, BookedSchedule }){
       // get current AvailableSchedule
       console.log("Function: getAvailableSchedule");
+
       let currentAvailableSchedule = await AvailableSchedule.find({
         office,
         // date: {$gte: new Date(startDate),  $lte: new Date(endDate) }
@@ -165,26 +169,30 @@ const guestResolver = {
         // get booked slots
         // console.log("Day: "+element.date);
         let formatDate = new Date(element.date)
+        
         formatDate.setHours(0,0,0,0)
-        let nextDate = new Date(formatDate.getFullYear(), formatDate.getMonth(), formatDate.getDate()+1)
-        const bookedSlots = await BookedSchedule.findOne({
+        let nextDate = formatDate.getTime() + 1000 * 60 * 60 * 24
+        const bookedSlots = await BookedSchedule.find({
           office,
-          date: {"$gte": formatDate, "$lt": nextDate}
+          date: {"$gte": formatDate.getTime(), "$lt": nextDate}
         })
-        if(bookedSlots){
+        if(bookedSlots.length){
         console.log(new Date(element.date))
           // delete slots are booked
-          console.log("date booked: "+bookedSlots.date)
-          console.log("slots are booked: "+bookedSlots.slots)
-          console.log("slots are availabled before: "+element.slots)
-          for(element2 of bookedSlots.slots){
-            if(element.slots.indexOf(element2)>=0)
-              element.slots.splice(element.slots.indexOf(element2), 1)
-          }
-          console.log("slots are availabled after: "+element.slots)
-          if(element.slots.length==0) {
-            // console.log(currentAvailableSchedule.indexOf(element))
-            currentAvailableSchedule.splice(currentAvailableSchedule.indexOf(element),1)
+          for(bookedOrder of bookedSlots){
+            console.log("date booked: "+bookedOrder.date)
+            console.log("slots are booked: "+bookedOrder.slots)
+            console.log("slots are availabled before: "+element.slots)
+            for(element2 of bookedOrder.slots){
+              if(element.slots.indexOf(element2)>=0)
+                element.slots.splice(element.slots.indexOf(element2), 1)
+            }
+            console.log("slots are availabled after: "+element.slots)
+            if(element.slots.length==0) {
+              // console.log(currentAvailableSchedule.indexOf(element))
+              currentAvailableSchedule.splice(currentAvailableSchedule.indexOf(element),1)
+            }
+
           }
         }
       }
@@ -441,6 +449,16 @@ const guestResolver = {
         throw new Error('Invalid token')
       }
     },
+    updateIdentity(_, { identity }, { User, req }) {
+      const userId = getUserId(req)
+      console.log('updateIdentity')
+      const user = User.findOneAndUpdate(
+        { _id: userId },
+        { identity },
+        { new: true }
+      )
+      return user
+    },
     updateProfile(_, { email, firstName, lastName, phone, identity, avatar, address }, { User, req }) {
       const userId = getUserId(req)
       console.log('updateProfile')
@@ -471,10 +489,24 @@ const guestResolver = {
     },
     async createBooking(_, { bookedSchedules }, {User,Notification,BookedSchedule, Office,Booking, Payment, req }) {
       console.log('createBooking')
+      // test moment get date at 00:00:00
+        //console.log('test',moment(element.date).startOf('day').format('DD/MM kk:mm:ss'))
+        //console.log('t+',moment(element.date).startOf('day').subtract(1,'seconds').format('DD/MM kk:mm:ss'))
+        //
+      let scheduleByOffice  = await getAvailableSchedule(bookedSchedules.office)
+      for(let day of scheduleByOffice){
+        // let a = moment(day.date).endOf('day')
+        // let b = moment(Number(bookedSchedules.date))
+        if(moment(day.date).endOf('day').diff(moment(Number(bookedSchedules.date)),'days')<1){ //book in cur day
+          for(let slot of bookedSchedules.slots){
+            if(!day.slots.includes(slot)) throw new Error('Schedule not available')
+          }
+        }
+      }
       const userId = getUserId(req, false)
       if(userId) {
         const user = await User.findById(userId)
-        if(!user.identity) await User.updateOne({_id:userId}, {identity})
+        if(!user.identity) await User.updateOne({_id:userId}, {identity:bookedSchedules.identity})
       }
       const {firstName, lastName, email, phone, identity} = bookedSchedules
       let officeId = bookedSchedules.office
@@ -515,7 +547,7 @@ const guestResolver = {
           `${firstName} ${lastName} book slots ${bookedSchedules.slots} on ${bookedSchedules.date} - ${office.title}`}).save()
 
       return {id: newBooking._id, office, createdAt: newBooking.createdAt,firstName,lastName,email,phone,
-        bookedSchedules:newBookedSchedule, payment: {totalPrice}}
+        bookedSchedules:newBookedSchedule, payment: {totalPrice}, identity}
     },
     async createBookedSchedule(_, { office, date, slots }, { BookedSchedule }) {
       const newBookedSchedule = await new BookedSchedule({
@@ -558,6 +590,17 @@ const guestResolver = {
         country
       }).save()
       return newCreditCardInformation
+    },
+    async sendAdmin(_, { content }, {req, User, Message, Conversation}){
+      console.log('sendAdmin')
+      const userId = getUserId(req)
+      let to = await User.findOne({role: 'admin'}) //admin
+      const newMessage = await new Message({from: userId, to, content}).save()
+      let convo = await Conversation.findOne({participants: {$all: [userId, to]}})
+      if(convo) await Conversation.updateOne({_id: convo._id},{read:false,
+        createdAt: new Date(),$push: {messages: {$each: [newMessage._id]}}})
+      else await new Conversation({participants: [userId, to], messages:[newMessage._id]}).save()
+      return newMessage
     },
     async createMessage(_, { to, content}, {req, User, Message, Conversation}){
       console.log('createMessage')

@@ -92,7 +92,7 @@ const addMoneyToRevenue = async ({host,total,withdrawable}) => {
 
 const getAvailableSchedule = async(office) => {
   // get current AvailableSchedule
-  console.log("Function: getAvailableSchedule");
+  console.log("Function: getAvailableScheduleUtils");
   let currentAvailableSchedule = await AvailableSchedule.find({
     office,
     // date: {$gte: new Date(startDate),  $lte: new Date(endDate) }
@@ -103,27 +103,30 @@ const getAvailableSchedule = async(office) => {
     // console.log("Day: "+element.date);
     let formatDate = new Date(element.date)
     formatDate.setHours(0,0,0,0)
-    let nextDate = new Date(formatDate.getFullYear(), formatDate.getMonth(), formatDate.getDate()+1)
-    const bookedSlots = await BookedSchedule.findOne({
+    let nextDate = formatDate.getTime() + 1000 * 60 * 60 * 24
+    const bookedSlots = await BookedSchedule.find({
       office,
-      date: {"$gte": formatDate, "$lt": nextDate}
+      date: {"$gte": formatDate.getTime(), "$lt": nextDate}
     })
-    if(bookedSlots){
-    console.log(new Date(element.date))
-      // delete slots are booked
-      // console.log("date booked: "+bookedSlots.date)
-      // console.log("slots are booked: "+bookedSlots.slots)
-      // console.log("slots are availabled before: "+element.slots)
-      for(element2 of bookedSlots.slots){
-        if(element.slots.indexOf(element2)>=0)
-          element.slots.splice(element.slots.indexOf(element2), 1)
+    if(bookedSlots.length){
+      console.log(new Date(element.date))
+        // delete slots are booked
+        for(bookedOrder of bookedSlots){
+          console.log("date booked: "+bookedOrder.date)
+          console.log("slots are booked: "+bookedOrder.slots)
+          console.log("slots are availabled before: "+element.slots)
+          for(element2 of bookedOrder.slots){
+            if(element.slots.indexOf(element2)>=0)
+              element.slots.splice(element.slots.indexOf(element2), 1)
+          }
+          console.log("slots are availabled after: "+element.slots)
+          if(element.slots.length==0) {
+            // console.log(currentAvailableSchedule.indexOf(element))
+            currentAvailableSchedule.splice(currentAvailableSchedule.indexOf(element),1)
+          }
+
+        }
       }
-      // console.log("slots are availabled after: "+element.slots)
-      if(element.slots.length==0) {
-        // console.log(currentAvailableSchedule.indexOf(element))
-        currentAvailableSchedule.splice(currentAvailableSchedule.indexOf(element),1)
-      }
-    }
   }
   // console.log("AvailableSchedule result: "+currentAvailableSchedule)
   return currentAvailableSchedule

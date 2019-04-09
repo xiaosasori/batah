@@ -39,6 +39,10 @@ const BookingSchema = new mongoose.Schema({
     phone: {
         type: String,
         required: true
+    },
+    identity: {
+        type: Array,
+        required: true
     }
 })
 
