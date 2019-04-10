@@ -1,13 +1,12 @@
 const sendgrid = require('sendgrid')
 const helper = sendgrid.mail
-console.log(process.env.SENDGRID)
 
 class Mailer extends helper.Mail {
-    constructor({ recipients }, content) {
+    constructor({ recipients, subject }, content) {
         super();
         this.sgApi = sendgrid(process.env.SENDGRID);
         this.from_email = new helper.Email('no-reply@batah.space');
-        this.subject = 'Your order on Batah';
+        this.subject = subject;
         this.body = new helper.Content('text/html', content);
         this.recipients = this.formatAddresses(recipients);
         this.addContent(this.body);

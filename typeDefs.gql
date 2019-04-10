@@ -343,6 +343,8 @@ input BoundInput{
 type Mutation {
   setPassword(password: String! confirmPassword: String!): User!
   changePassword(currentPassword: String! password: String! confirmPassword: String!): User!
+  reqResetPassword(email: String!): Boolean!
+  resetPassword(token: String! password:String!): Boolean!
   signup(
     email: String!
     password: String!

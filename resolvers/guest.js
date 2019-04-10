@@ -1,3 +1,4 @@
+const jwt = require('jsonwebtoken');
 const {
   hashPassword,
   createToken,
@@ -8,6 +9,7 @@ const {
 } = require('../utils')
 const Mailer = require('../services/Mailer')
 const surveyTemplate = require('../services/template/booking')
+const resetTemplate = require('../services/template/resetPassword')
 const bcryptjs = require('bcryptjs')
 const { OAuth2Client } = require('google-auth-library')
 const CLIENT_ID = '131089285485-c6aep24hbqq39l6ftd5mnjep5495tssc.apps.googleusercontent.com'
@@ -288,6 +290,7 @@ const guestResolver = {
       let office = await Office.findById('5ca088184433ea13b4adf847')
       
       const order = {
+        subject: 'Your booking on Batah',
         title: office.title,redirectDomain:'http://www.batah.space/invoice/5cac0fe40ff43a171c6b8c08',
         recipients: email.split(',').map(email => ({ email: email.trim() }))
     }
@@ -370,6 +373,42 @@ const guestResolver = {
     }
   },
   Mutation: {
+    async reqResetPassword(_, { email }, { User }){
+      console.log('reqResetPassword')
+      const user = await User.findOne({email})
+      if(!user) throw new Error('User not found') //check if user with this email exists
+      let token = createToken(user, '1hr')
+
+       //send email
+        const order = {
+        subject: 'Batah - Reset your password',
+        email,
+        resetLink:`http://www.batah.space/resetPassword/${token}`,
+        recipients: email.split(',').map(email => ({ email: email.trim() }))
+      }
+      const mailer = new Mailer(order, resetTemplate(order));
+      try{
+        await mailer.send();
+        return true
+      }catch{
+        throw new Error('Something wrong happended. Please try again later')
+      }
+    },
+    async resetPassword(_, {token, password}, { User}){
+      console.log('resetPassword')
+
+      if(token){
+        try {
+          const decoded = jwt.verify(token, process.env.SECRET);
+          const userId =  decoded.userId;
+          const hashedPassword = await hashPassword(password)
+          await User.updateOne({_id: userId}, {password:hashedPassword})
+          return true
+        } catch (err) {
+          throw new Error('Invalid token');
+        }
+      }
+    },
     async setPassword(_, { password, confirmPassword }, { req, User }) {
       if(password !== confirmPassword) throw new Error('Password and Confirm password are not matched')
       const userId = getUserId(req)
@@ -563,6 +602,7 @@ const guestResolver = {
 
       //send email
       const order = {
+        subject: 'Your booking on Batah',
         title: office.title,
         redirectDomain:`http://www.batah.space/invoice/${newBooking._id}`,
         recipients: email.split(',').map(email => ({ email: email.trim() }))
