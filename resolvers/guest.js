@@ -73,19 +73,35 @@ const guestResolver = {
       // search
       let pageSize = 6
       let pageNum = !!page ? page : 1
-      let foundOffices = await Office.find(
-        {"$text": {"$search": searchTerm}}, {score: {"$meta":'textScore'},...condition})
-      .sort({score: {"$meta": 'textScore'}})
-      .skip(pageSize * (pageNum-1))
-      .limit(pageSize)
-      .select('title category address shortDescription numSeats pictures tags status size')
-      .populate([{
-        path: 'pricing'
-      },{
-        path: 'location'
-      }, {
-        path: 'reviews'
-      }])
+      let foundOffices = []
+      if(searchTerm){
+        foundOffices=await Office.find(
+          {"$text": {"$search": searchTerm}}, {score: {"$meta":'textScore'}})
+          .where(condition)
+        .sort({score: {"$meta": 'textScore'}})
+        .skip(pageSize * (pageNum-1))
+        .limit(pageSize)
+        .select('title category address shortDescription numSeats pictures tags status size')
+        .populate([{
+          path: 'pricing'
+        },{
+          path: 'location'
+        }, {
+          path: 'reviews'
+        }])
+      } else {
+        foundOffices=await Office.find(condition)
+        .skip(pageSize * (pageNum-1))
+        .limit(pageSize)
+        .select('title category address shortDescription numSeats pictures tags status size')
+        .populate([{
+          path: 'pricing'
+        },{
+          path: 'location'
+        }, {
+          path: 'reviews'
+        }])
+      }
       let totalDocs =  await Office.find(condition).count()
       console.log('totalDocs',totalDocs)
       const hasMore = totalDocs > pageSize * pageNum
@@ -161,6 +177,7 @@ const guestResolver = {
       let results = []
       for(s of sContain){
         condition.address = { "$regex": s, "$options": "i" }
+        condition.status='active'
         const currentOffice = await Office.find(condition)
         results.push(currentOffice.length)
       }
@@ -342,14 +359,19 @@ const guestResolver = {
       // console.log('res: ',result)
       return result
     },
-    async canReview(_, {office}, { Office,Booking, req}){
+    async canReview(_, {office}, { Office,Booking, Review, req}){
       let canReview = false
       const userId = getUserId(req, false)
       if(userId) {
         const isHost = await Office.findOne({host: userId, _id: office})
-        if(isHost) {console.log('isHost');return false;}
-        let booking = await Booking.findOne({bookee: userId, office})
-        if(booking) canReview = true
+        if(isHost) return false; //host cant review his office
+        let booking = await Booking.find({bookee: userId, office}).sort('-createdAt')
+        if(!booking) return false //user has not book this office
+        let lastestBooking = booking[0]
+        let review = await Review.find({office, user:userId}).sort('-createdAt')
+        let lastestReview = review[0]
+        if(lastestBooking.createdAt > lastestReview.createdAt) canReview = true //user has new book and not review yet
+        else canReview= false // user has reviewed on lastest booking
       }
       return canReview
     },

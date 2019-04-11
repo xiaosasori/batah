@@ -249,7 +249,7 @@ type Query {
   getCurrentUser: User
   searchTitle(searchTerm: String): [Office!]
   searchOffice(searchTerm: String, area: AreaInput, category: String! page:Int): searchOfficesPayload!
-  getOffices: [Office!] 
+  getOffices: getOfficesPayload
   getOffice(id: String!): Office!
   searchOfficeByFilter(id: [ID!]!, minSize: Int, maxSize: Int, minNumSeats: Int, maxNumSeats: Int, minPrice: Int, maxPice: Int, amenities: [String!]): [Office!]
   topBookingOffice: [Office!]!
@@ -271,7 +271,10 @@ type Query {
   getOfficeByStatus: OfficeByStatusPayload!
   getAdminRevenue: AdminRevenuePayload!
 }
-
+type getOfficesPayload {
+  offices: [Office!]
+  booking: [Booking!]
+}
 type AdminRevenuePayload {
   revenue: [Revenue!],
         total: Float!,

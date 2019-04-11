@@ -6,10 +6,33 @@ const {
 
 const hostResolver = {
   Query: {
-    async getOffices(_, args, {User, Office, req}){
+    async getOffices(_, args, {Booking, Office, req}){
       const userId = getUserId(req);
-      const res = await Office.find({host: userId}).populate('reviews')
-      return res
+      const offices = await Office.find({host: userId}).populate('reviews')
+      const bookee = []
+      for(office of offices){
+        let bookingInfo = await Booking.find({office}).populate([{
+          path: 'bookee',
+          model: 'User',
+          select: 'firstName lastName avatar'
+        },{
+          path: 'bookedSchedules',
+          select: 'date slots'
+        },{
+          path: 'payment',
+          model: 'Payment',
+          select: 'totalPrice'
+        },{
+          path: 'office',
+          model: 'Office',
+          select: '_id title'
+        }]).select('createdAt')
+        
+        if(bookingInfo.length){
+          bookee.push(...bookingInfo)
+        }
+      }
+      return {offices, booking:bookee}
     },
     /* host can not edit booked schedule */
     async getBookedSchedule(_, {office},{ BookedSchedule }){
