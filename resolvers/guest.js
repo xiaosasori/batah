@@ -17,7 +17,7 @@ const moment = require('moment-timezone')
 const guestResolver = {
   Query: {
     async getCurrentUser(_, args, { User, req }) {
-      const userId = getUserId(req)
+      const userId = getUserId(req,false)
       return await User.findById(userId)
     },
     async getOffice(_, args, {Office}){
@@ -506,12 +506,12 @@ const guestResolver = {
       )
       return user
     },
-    updateProfile(_, { email, firstName, lastName, phone, identity, avatar, address }, { User, req }) {
+    updateProfile(_, { email, firstName, lastName, phone, avatar, address }, { User, req }) {
       const userId = getUserId(req)
       console.log('updateProfile')
       const user = User.findOneAndUpdate(
         { _id: userId },
-        { email, firstName, lastName, phone, identity, avatar, address },
+        { email, firstName, lastName, phone, avatar, address },
         { new: true }
       )
       return user
