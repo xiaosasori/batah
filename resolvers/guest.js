@@ -40,6 +40,12 @@ const guestResolver = {
       await addViewsView(office._id)
       return office
     },
+    async searchTitle(_,{searchTerm},{Office}){
+      const res = await Office.find({$text: {$search: searchTerm}}, {score: {$meta:'textScore'}}).select('_id title')
+      .sort({score: {$meta: 'textScore'}})
+      .limit(5)
+      return res
+    },
     async searchOffice(_, { searchTerm, area, category, page }, { Office, Location }) {
       console.log("Function: searchOffice")
       const condition = {status: 'active'}
@@ -47,8 +53,9 @@ const guestResolver = {
       
       console.log("searchTerm: " + searchTerm)
       if(searchTerm){
-        searchTerm = formatSearch(searchTerm)
-        condition.searchTitle = { "$regex": searchTerm, "$options": "i" }
+        // searchTerm = formatSearch(searchTerm)
+        // condition = {$text: {$search: searchTerm}}, {score: {$meta:'textScore'}}
+        // condition.searchTitle = { "$regex": searchTerm, "$options": "i" }
       }
 
       // area
@@ -66,9 +73,12 @@ const guestResolver = {
       // search
       let pageSize = 6
       let pageNum = !!page ? page : 1
-      let foundOffices = await Office.find(condition)
+      let foundOffices = await Office.find(
+        {"$text": {"$search": searchTerm}}, {score: {"$meta":'textScore'},...condition})
+      .sort({score: {"$meta": 'textScore'}})
       .skip(pageSize * (pageNum-1))
       .limit(pageSize)
+      .select('title category address shortDescription numSeats pictures tags status size')
       .populate([{
         path: 'pricing'
       },{
@@ -83,7 +93,6 @@ const guestResolver = {
       let result = [];
       if(foundOffices.length){
 
-        console.log('found: ',foundOffices.length)
           for (office of foundOffices) { //loop over all founded offices
             // create a copy of office
             let { id, title,category, address, shortDescription,numSeats, pictures,
@@ -101,8 +110,8 @@ const guestResolver = {
             // console.log(office.daysAvailable)
           }
       }
-
-        console.log('res length: ',result.length)
+      console.log('res length: ',result.length)
+      // console.log(foundOffices)
         return {foundOffices: result, hasMore}
     },
     async searchOfficeByFilter(_, { id, minSize, maxSize, minNumSeats, maxNumSeats, minPrice, maxPrice, amenities }, { Office, Pricing }) {
@@ -273,9 +282,12 @@ const guestResolver = {
       return res
     },
     async addView(_,{},{Review,req,User,Views, Office, Revenue, Booking}){
-      let a =await Review.find({office: "5c98f80fc54a9e3df2dc4ce7",user:"5c9edd213a7e4905ac5f6fe6"}).select('_id')
-      console.log(a)
-      return {numView: 1}
+      const offices = await Office.find({host:"5c973c0bf4b1381a4a117f3a"})
+      await Office.updateMany({host:"5c973c0bf4b1381a4a117f3a"},{tags:['vip','phannguyen']})
+      // let term = 'Phúc Quý Office có quà tặng dành cho quý doanh nghiệp'
+      // const res = await Office.find({$text: {$search: term}}, {score: {$meta:'textScore'}}).select('_id title')
+      // .sort({score: {$meta: 'textScore'}})
+      // console.log(res)
       /*
       let email = 'xiaosasori@gmail.com'
       let office = await Office.findById('5ca088184433ea13b4adf847')

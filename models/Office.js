@@ -1,5 +1,5 @@
 const mongoose = require('mongoose')
-const PlaceSchema = new mongoose.Schema({
+const Officechema = new mongoose.Schema({
     title: {
         type: String,
         required: true
@@ -109,4 +109,9 @@ const PlaceSchema = new mongoose.Schema({
         default:'pending'
     }
 })
-module.exports = mongoose.model('Office', PlaceSchema)
+
+// Create index to search on all fields of posts
+Officechema.index({
+    '$**': 'text'
+});
+module.exports = mongoose.model('Office', Officechema)

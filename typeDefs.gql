@@ -247,6 +247,7 @@ type Conversation {
 type Query {
   me: User!
   getCurrentUser: User
+  searchTitle(searchTerm: String): [Office!]
   searchOffice(searchTerm: String, area: AreaInput, category: String! page:Int): searchOfficesPayload!
   getOffices: [Office!] 
   getOffice(id: String!): Office!
