@@ -314,10 +314,6 @@ type searchOfficesPayload {
   hasMore: Boolean!
 }
 
-type Subscription {
-  notification: Notification!
-}
-
 type DashBoard {
   activeOffices: Int!
   totalViews: Int!

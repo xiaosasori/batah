@@ -272,20 +272,11 @@ const guestResolver = {
       // console.log(conversations)
       return res
     },
-    async addView(_,{},{User,Views, Office, Revenue, Booking}){
-      /** fix host to guest*/
-      // let a =await User.update({}, {role: 'guest'}, {multi:true}).where('offices').size(0)
-      // console.log('user :',a)
-      /** Update booking with name, phone ,email */
-      // const bookings = await Booking.find().populate('bookee')
-      // for(let booking of bookings){
-      //   let update = {
-      //     firstName:booking.bookee.firstName,
-      //     lastName:booking.bookee.lastName,
-      //     email:booking.bookee.email
-      //   }
-      //   await Booking.updateOne({_id: booking._id},update, {new:true})
-      // }
+    async addView(_,{},{Review,req,User,Views, Office, Revenue, Booking}){
+      let a =await Review.find({office: "5c98f80fc54a9e3df2dc4ce7",user:"5c9edd213a7e4905ac5f6fe6"}).select('_id')
+      console.log(a)
+      return {numView: 1}
+      /*
       let email = 'xiaosasori@gmail.com'
       let office = await Office.findById('5ca088184433ea13b4adf847')
       
@@ -301,6 +292,7 @@ const guestResolver = {
     } catch (err) {
         console.log(err);
     }
+    */
       // console.log('addView')
       // let users = await User.find()
       // for(user of users){
@@ -369,6 +361,7 @@ const guestResolver = {
           {path:'office',model:'Office',select: 'title _id'}
         ])
         .select('createdAt stars pictures text')
+        .sort('-createdAt')
         return reviews
     }
   },
@@ -669,14 +662,15 @@ const guestResolver = {
     async createMessage(_, { to, content}, {req, User, Message, Conversation}){
       console.log('createMessage')
       const userId = getUserId(req)
-      if(userId === to) throw new Error('Cannot send message')
+      if(userId === to) throw new Error('Cannot send message') //receiver == sender
       let receiver = await User.findById(to)
-      if(!receiver) throw new Error('Cannot send message to this receiver')
+      if(!receiver) throw new Error('Cannot send message to this receiver') //recreive not exist
       const newMessage = await new Message({from: userId, to, content}).save()
       let convo = await Conversation.findOne({participants: {$all: [userId, to]}})
       if(convo) await Conversation.updateOne({_id: convo._id},{read:false,
         createdAt: new Date(),$push: {messages: {$each: [newMessage._id]}}})
       else await new Conversation({participants: [userId, to], messages:[newMessage._id]}).save()
+      
       return newMessage
     },
     async updateMessage(_, { id}, {req, Conversation, Message}){

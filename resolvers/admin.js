@@ -6,7 +6,13 @@ const adminResolver = {
       const userId = getUserId(req)
       const user = await User.findById(userId)
       if(!user || user.role!=='admin') throw new Error('You cannot access this page')
-      const offices = await Office.find().select('id title address description pictures status')
+      const offices = await Office.find()
+      .populate({
+        path: 'host',
+        model: 'User',
+        select: '_id firstName lastName'
+      })
+      .select('id title address description pictures status')
       const active = offices.filter(office => office.status==='active')
       const pending = offices.filter(office => office.status==='pending')
       const deactive = offices.filter(office => office.status==='deactive')

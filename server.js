@@ -1,5 +1,4 @@
-const {ApolloServer, AuthenticationError, PubSub } = require('apollo-server');
-const pubsub = new PubSub();
+const {ApolloServer, AuthenticationError } = require('apollo-server');
 const mongoose = require('mongoose');
 // import models
 const User = require('./models/User')
@@ -47,7 +46,7 @@ const server = new ApolloServer({
   typeDefs,
   resolvers,
   context: async ({req}) => {
-    return {
+      return {
       User,
       Office,
       Location,
@@ -67,9 +66,8 @@ const server = new ApolloServer({
       Revenue,
       PayoutPending,
       Notification,
-      req,
-      pubsub
-    }
+      req
+      }
   }
 })
 // Run

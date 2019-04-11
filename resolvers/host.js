@@ -102,6 +102,7 @@ const hostResolver = {
           {path:'office',model:'Office',select: 'title _id'}
         ])
         .select('createdAt stars pictures text')
+        .sort('-createdAt')
         console.log(reviews)
         return reviews
     }

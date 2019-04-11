@@ -15,8 +15,7 @@ const createToken = (user, expiresIn) => {
 const getUserId = (request, requireAuth = true) => {
   const token = request
     ? request.headers.authorization
-    : request.connection.context.Authorization;
-
+    : null
   if (token) {
     // const token = header.replace('Bearer ', '')
     try {

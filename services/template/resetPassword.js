@@ -7,7 +7,7 @@ module.exports = args => {
         <img src="https://imgur.com/YKNIcwn.png">
       </div>
       <h3>We received your request to reset password of an account registered with email ${args.email}</h3>
-      <p>Here is the <a href="${args.resetLink}">link</a> to reset your password. This will expired in 
+      <p>Here is the <a href="${args.resetLink}">link</a> to reset your password. This will expire in 
         <b style="color:red">1 hour</b>
       </p>
     </div>
