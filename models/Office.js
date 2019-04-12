@@ -5,8 +5,7 @@ const Officechema = new mongoose.Schema({
         required: true
     },
     searchTitle: {
-        type: String,
-        required: true
+        type: String
     },
     category: {
         type: String,

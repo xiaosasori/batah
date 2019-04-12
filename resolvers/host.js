@@ -240,7 +240,7 @@ const hostResolver = {
       const userId = getUserId(req)
       // if admin haven't accept (status = unpaid) the last request => can not withdraw
       const currentPayoutPending = await PayoutPending.find({host: userId, status: "unpaid"})
-      if(currentPayoutPending) {
+      if(currentPayoutPending.length) {
         return null
       }
       if(paypal) await User.updateOne({_id: userId}, {paypal})
