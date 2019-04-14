@@ -10,8 +10,8 @@ const hostResolver = {
       const userId = getUserId(req);
       const offices = await Office.find({host: userId}).populate('reviews')
       const bookee = []
-      for(office of offices){
-        let bookingInfo = await Booking.find({office}).populate([{
+      for(let office of offices){
+        let bookingInfo = await Booking.find({office:office._id}).populate([{
           path: 'bookee',
           model: 'User',
           select: 'firstName lastName avatar'
@@ -26,7 +26,7 @@ const hostResolver = {
           path: 'office',
           model: 'Office',
           select: '_id title'
-        }]).select('createdAt')
+        }]).select('createdAt firstName lastName email phone')
         
         if(bookingInfo.length){
           bookee.push(...bookingInfo)
@@ -94,7 +94,7 @@ const hostResolver = {
       if(user.role !== 'host') throw new Error('You have no access to this')
       const revenue = await Revenue.findOne({host: userId}) // {id,host,total, withdrawable}
       let bookings = []
-      for(office of user.offices){
+      for(let office of user.offices){
         let booking = await Booking.find({office:office._id}).populate([{ //[]
           path: 'payment', //{id,payment:{totalPrice}, createdAt}
           model: 'Payment',
