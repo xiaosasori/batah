@@ -3,6 +3,7 @@ const {
   formatSearch,
   createPayoutPending
 } = require('../utils')
+const moment = require('moment-timezone')
 
 const hostResolver = {
   Query: {
@@ -204,7 +205,10 @@ const hostResolver = {
       console.log('updateOfficeSchedule')
       try{
         await AvailableSchedule.deleteMany({office: args.officeId})
-        args.schedule.forEach(async el => await new AvailableSchedule({...el,office: args.officeId}).save())
+        for(let item of args.schedule) {
+          if(moment().startOf('day').valueOf()<Number(item.date))
+            await new AvailableSchedule({date:Number(item.date),slots:item.slots,office: args.officeId}).save()
+        }
         return true
       }catch{
         return false

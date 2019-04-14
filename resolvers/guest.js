@@ -192,20 +192,19 @@ const guestResolver = {
       let currentAvailableSchedule = await AvailableSchedule.find({
         office,
         // date: {$gte: new Date(startDate),  $lte: new Date(endDate) }
-      })
+      }).sort('date');
 
       // delete slots in each day
-      for(element of currentAvailableSchedule){
+      for(let element of currentAvailableSchedule){
         // get booked slots
         // console.log("Day: "+element.date);
-        let formatDate = new Date(element.date)
-        
-        formatDate.setHours(0,0,0,0)
-        let nextDate = formatDate.getTime() + 1000 * 60 * 60 * 24
+        console.log("Day: "+ moment(element.date).format('DD MMM'));
+        let formatDate = moment(element.date).startOf('day').valueOf()
+        let nextDate = moment(element.date).endOf('day').valueOf()
         const bookedSlots = await BookedSchedule.find({
           office,
-          date: {"$gte": formatDate.getTime(), "$lt": nextDate}
-        })
+          date: { $gte: formatDate, $lt: nextDate }
+        });
         if(bookedSlots.length){
         console.log(new Date(element.date))
           // delete slots are booked
@@ -213,7 +212,7 @@ const guestResolver = {
             console.log("date booked: "+bookedOrder.date)
             console.log("slots are booked: "+bookedOrder.slots)
             console.log("slots are availabled before: "+element.slots)
-            for(element2 of bookedOrder.slots){
+            for(let element2 of bookedOrder.slots){
               if(element.slots.indexOf(element2)>=0)
                 element.slots.splice(element.slots.indexOf(element2), 1)
             }

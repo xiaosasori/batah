@@ -95,17 +95,16 @@ const getAvailableSchedule = async(office) => {
   let currentAvailableSchedule = await AvailableSchedule.find({
     office,
     // date: {$gte: new Date(startDate),  $lte: new Date(endDate) }
-  })
+  }).sort('date');
   // delete slots in each day
   for(element of currentAvailableSchedule){
     // get booked slots
     // console.log("Day: "+element.date);
-    let formatDate = new Date(element.date)
-    formatDate.setHours(0,0,0,0)
-    let nextDate = formatDate.getTime() + 1000 * 60 * 60 * 24
+    let formatDate = moment(element.date).startOf('day').valueOf()
+    let nextDate = moment(element.date).endOf('day').valueOf()
     const bookedSlots = await BookedSchedule.find({
       office,
-      date: {"$gte": formatDate.getTime(), "$lt": nextDate}
+      date: {"$gte": formatDate, "$lt": nextDate}
     })
     if(bookedSlots.length){
       console.log(new Date(element.date))
