@@ -28,7 +28,11 @@ const adminResolver = {
       const revenue = await Revenue.find().populate({
         path: 'host',
         model: 'User',
-        select: 'firstName lastName id avatar'
+        select: 'firstName lastName id avatar',
+        populate: {
+          path: 'offices',
+          model: 'Office'
+        }
       }).sort('-total')
       const payouts = await PayoutPending.find().populate({
         path: 'host',
@@ -37,12 +41,37 @@ const adminResolver = {
       }).sort('-createdAt')
       let paid =await PayoutPending.aggregate([{$match: {status: 'paid'}},{$group: {_id:null,sum:{$sum: "$money"}}}])
       console.log('paid',paid)
+      //host earning
+      let hostEarnings = []
+      // console.log(revenue.user)
+      for(let rev of revenue){
+        // console.log(rev.host.offices)
+        let userId = rev.host._id
+        for(let office of rev.host.offices) {console.log(office._id)
+          let book = await Booking.find({office:office._id}).populate([{ //[]
+            path: 'payment', //{id,payment:{totalPrice}, createdAt}
+            model: 'Payment',
+            select: 'totalPrice'
+          }, {
+            path: 'office',
+            model: 'Office',
+            select: 'title',
+            populate: {
+              path: 'host',
+              model: 'User'
+            }
+          }]).select('createdAt')
+          hostEarnings.push(...book)
+        }
+      }
+      hostEarnings = hostEarnings.sort((a,b)=> a.createdAt < b.createdAt)
       return {
         revenue,
         total,
         bookings,
         payouts,
-        balance: paid.length>0?paid[0].sum : 0
+        balance: paid.length>0?paid[0].sum : 0,
+        hostEarnings
       }
     }
   },

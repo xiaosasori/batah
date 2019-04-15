@@ -281,6 +281,7 @@ type AdminRevenuePayload {
         bookings: Int!,
         payouts: [PayoutPending!]
         balance: Float!
+        hostEarnings: [Booking!]
 }
 
 type OfficeByStatusPayload {
