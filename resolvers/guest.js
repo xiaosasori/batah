@@ -217,9 +217,8 @@ const guestResolver = {
                 element.slots.splice(element.slots.indexOf(element2), 1)
             }
             console.log("slots are availabled after: "+element.slots)
-            if(element.slots.length==0) {
-              // console.log(currentAvailableSchedule.indexOf(element))
-              currentAvailableSchedule.splice(currentAvailableSchedule.indexOf(element),1)
+            if (element.slots.length == 0) {
+              currentAvailableSchedule=currentAvailableSchedule.filter(el => el.date !== element.date)
             }
 
           }
