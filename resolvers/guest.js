@@ -367,6 +367,7 @@ const guestResolver = {
         if(!booking) return false //user has not book this office
         let lastestBooking = booking[0]
         let review = await Review.find({office, user:userId}).sort('-createdAt')
+        if(review.length===0) return true
         let lastestReview = review[0]
         if(lastestBooking.createdAt > lastestReview.createdAt) canReview = true //user has new book and not review yet
         else canReview= false // user has reviewed on lastest booking
