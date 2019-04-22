@@ -364,7 +364,7 @@ const guestResolver = {
         const isHost = await Office.findOne({host: userId, _id: office})
         if(isHost) return false; //host cant review his office
         let booking = await Booking.find({bookee: userId, office}).sort('-createdAt')
-        if(!booking) return false //user has not book this office
+        if(!booking.length) return false //user has not book this office
         let lastestBooking = booking[0]
         let review = await Review.find({office, user:userId}).sort('-createdAt')
         if(review.length===0) return true
@@ -373,6 +373,29 @@ const guestResolver = {
         else canReview= false // user has reviewed on lastest booking
       }
       return canReview
+    },
+    async checkSchedule(_,{bookedSchedules},{}){
+      let scheduleByOffice = await getAvailableSchedule(bookedSchedules.office);
+      moment('2019-04-25').valueOf()
+      for (let day of scheduleByOffice) {
+        // let a = moment(day.date).endOf('day')
+        // let b = moment(Number(bookedSchedules.date))
+        // if(moment(day.date).endOf('day').diff(moment(Number(bookedSchedules.date)),'days',true)<=1 && moment(day.date).endOf('day').diff(moment(Number(bookedSchedules.date)),'days',true)>=0){ //book in cur day
+        if (
+          moment(day.date)
+            .endOf('day')
+            .diff(moment(Number(bookedSchedules.date)), 'days', true) < 1 &&
+            moment(day.date)
+            .endOf('day')
+            .diff(moment(Number(bookedSchedules.date)), 'days', true) > 0) {
+          //book in cur day
+            // if (!day.slots.includes(...bookedSchedules.slots))
+            //   throw new Error('Schedule not available');
+            if(bookedSchedules.slots.every(elem => day.slots.indexOf(elem) > -1))
+              return true
+        }
+      }
+      return false
     },
     async getBookmarks(_,{},{req, User}){
       const userId = getUserId(req,false)
@@ -575,12 +598,18 @@ const guestResolver = {
         //
       let scheduleByOffice  = await getAvailableSchedule(bookedSchedules.office)
       for(let day of scheduleByOffice){
-        // let a = moment(day.date).endOf('day')
-        // let b = moment(Number(bookedSchedules.date))
-        if(moment(day.date).endOf('day').diff(moment(Number(bookedSchedules.date)),'days')<1){ //book in cur day
-          for(let slot of bookedSchedules.slots){
-            if(!day.slots.includes(slot)) throw new Error('Schedule not available')
-          }
+        if (
+          moment(day.date)
+            .endOf('day')
+            .diff(moment(Number(bookedSchedules.date)), 'days', true) < 1 &&
+            moment(day.date)
+            .endOf('day')
+            .diff(moment(Number(bookedSchedules.date)), 'days', true) > 0) {
+          //book in cur day
+            // if (!day.slots.includes(...bookedSchedules.slots))
+            //   throw new Error('Schedule not available');
+            if(!bookedSchedules.slots.every(elem => day.slots.indexOf(elem) > -1))
+              throw new Error('Schedule not available');
         }
       }
       const userId = getUserId(req, false)

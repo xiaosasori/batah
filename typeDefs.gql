@@ -264,6 +264,7 @@ type Query {
   addView: Views
   getDashboard: DashBoard!
   canReview(office: ID!): Boolean!
+  checkSchedule(bookedSchedules:CheckScheduleInput!): Boolean!
   getBookmarks: [Office!]
   getRevenue: RevenuePayload!
   getVisitorReviews: [Review!]
@@ -329,6 +330,12 @@ type DashBoard {
 
 type Price{
   price: Float
+}
+
+input CheckScheduleInput {
+  office: ID!
+    date: String!
+    slots: [Int!]!
 }
 
 input AreaInput{
