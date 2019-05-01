@@ -630,7 +630,7 @@ const guestResolver = {
       // console.log('id',payment._id)
       const newBookedSchedule = await new BookedSchedule({
         office: officeId,
-        date : new Date(bookedSchedules.date),
+        date : new Date(Number(bookedSchedules.date)),
         slots: bookedSchedules.slots
       }).save()
       console.log(`${firstName} ${lastName} ${phone} ${email}`)
