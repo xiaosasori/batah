@@ -3,6 +3,7 @@ const {getUserId} = require('../utils');
 const adminResolver = {
   Query: {
     async getOfficeByStatus(_,{},{req,User, Office}){
+      console.log('getOfficeByStatus')
       const userId = getUserId(req)
       const user = await User.findById(userId)
       if(!user || user.role!=='admin') throw new Error('You cannot access this page')
