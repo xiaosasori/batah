@@ -292,7 +292,7 @@ type OfficeByStatusPayload {
 }
 
 type RevenuePayload {
-  revenue: Revenue!
+  revenue: Revenue
   bookings: [Booking!]
   payoutHistories: [PayoutPending!]
 }

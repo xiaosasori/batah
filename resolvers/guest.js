@@ -376,11 +376,12 @@ const guestResolver = {
     },
     async checkSchedule(_,{bookedSchedules},{}){
       let scheduleByOffice = await getAvailableSchedule(bookedSchedules.office);
-      moment('2019-04-25').valueOf()
       for (let day of scheduleByOffice) {
         // let a = moment(day.date).endOf('day')
         // let b = moment(Number(bookedSchedules.date))
         // if(moment(day.date).endOf('day').diff(moment(Number(bookedSchedules.date)),'days',true)<=1 && moment(day.date).endOf('day').diff(moment(Number(bookedSchedules.date)),'days',true)>=0){ //book in cur day
+        console.log(moment(day.date).valueOf())
+        console.log(moment(day.date).format('DD-MM-YYYY'))
         if (
           moment(day.date)
             .endOf('day')
