@@ -297,8 +297,8 @@ const guestResolver = {
       return res
     },
     async addView(_,{},{Review,req,User,Views, Office, Revenue, Booking}){
-      const offices = await Office.find({host:"5c973c0bf4b1381a4a117f3a"})
-      await Office.updateMany({host:"5c973c0bf4b1381a4a117f3a"},{tags:['vip','phannguyen']})
+      // const offices = await Office.find({host:"5c973c0bf4b1381a4a117f3a"})
+      // await Office.updateMany({host:"5c973c0bf4b1381a4a117f3a"},{tags:['vip','phannguyen']})
       // let term = 'Phúc Quý Office có quà tặng dành cho quý doanh nghiệp'
       // const res = await Office.find({$text: {$search: term}}, {score: {$meta:'textScore'}}).select('_id title')
       // .sort({score: {$meta: 'textScore'}})
@@ -321,10 +321,11 @@ const guestResolver = {
     }
     */
       // console.log('addView')
-      // let users = await User.find()
-      // for(user of users){
-      //   await new Revenue({host: user._id}).save()
-      // }
+      let users = await User.find()
+      for(user of users){
+        let rev = await Revenue.findOne({host: user._id})
+        if(!rev)await new Revenue({host: user._id}).save()
+      }
       // await Office.update({}, {status: 'pending'}, {multi:true})
       // const offices = await Office.find()
       // for(o of offices){

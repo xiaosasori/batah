@@ -94,6 +94,7 @@ const hostResolver = {
       // console.log('user',user)
       if(user.role !== 'host') throw new Error('You have no access to this')
       const revenue = await Revenue.findOne({host: userId}) // {id,host,total, withdrawable}
+      console.log(revenue)
       let bookings = []
       for(let office of user.offices){
         let booking = await Booking.find({office:office._id}).populate([{ //[]
@@ -132,7 +133,7 @@ const hostResolver = {
     }
   },
   Mutation: {
-    async createList(_, args, { User, Office, Location, Pricing, OfficeRules, AvailableSchedule, Views, req }) {
+    async createList(_, args, { Revenue,User, Office, Location, Pricing, OfficeRules, AvailableSchedule, Views, req }) {
       const userId = getUserId(req);
       const newLocation = await new Location(args.location).save();
       const newPricing = await new Pricing(args.pricing).save();
@@ -156,6 +157,9 @@ const hostResolver = {
         { $push: { offices: { $each: [savedOffice._id], $position: 0 } },
                   role: 'host' }
       );
+      const rev=await Revenue.findOne({host: userId})
+      if(!rev)
+        await new Revenue({host: userId}).save()
       await new Views({office: savedOffice._id}).save()
       return savedOffice;
     },
