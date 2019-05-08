@@ -468,7 +468,7 @@ type Mutation {
   addViewsView(office: ID!): Views!
   createRevenue(host: ID!): Revenue!
   addMoneyToRevenue(host: ID! money: Float!): Revenue!
-  withdrawRevenue: WithdrawRevenuePayload!
+  withdrawRevenue: WithdrawRevenuePayload
   bookmarkOffice(office: ID!): String!
   unBookmarkOffice(office: ID!): String!
   acceptPayoutPending(payoutId: ID!): PayoutPending!
