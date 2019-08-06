@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "server": "nodemon server.js",
+    "start": "node index.js",
+    "server": "nodemon index.js",
     "client": "npm run serve --prefix client",
     "dev": "concurrently --names \"server,client\" \"npm run server \" \"npm run client \"",
     "test": "echo \"Error: no test specified\" && exit 1"
