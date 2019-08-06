@@ -42,7 +42,6 @@ mongoose
 // Create graphql server
 const resolvers = require('./resolvers/index')
 const server = new ApolloServer({
-  cors: true,
   typeDefs,
   resolvers,
   introspection: true,
@@ -73,6 +72,6 @@ const server = new ApolloServer({
   }
 })
 // Run
-server.listen(process.env.PORT || 3000).then(({ url }) => {
+server.listen({port: process.env.PORT || 3000}).then(({ url }) => {
   console.log(`🚀  Server ready at ${url}`);
 });
