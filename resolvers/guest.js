@@ -18,7 +18,7 @@ const guestResolver = {
   Query: {
     async getCurrentUser(_, args, { User, req }) {
       const userId = getUserId(req,false)
-      return await User.findById(userId)
+      return await User.findById(userId).select("firstName lastName avatar email")
     },
     async getOffice(_, args, {Office}){
       console.log('getOffice')
